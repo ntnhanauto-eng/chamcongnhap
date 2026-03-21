@@ -22,23 +22,21 @@
 
         .summary-wrapper { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; border-top: 2px solid #eee; padding-top: 15px; }
         
-        /* BẢNG LƯƠNG CHI TIẾT */
         .salary-table { width: 100%; border: 1px solid var(--border-color); border-collapse: collapse; }
-        .salary-table td { padding: 8px; border: 1px solid #ddd; font-size: 15px; } /* Cỡ chữ bằng LCB */
+        .salary-table td { padding: 8px; border: 1px solid #ddd; font-size: 15px; }
         
-        /* Ô NHẬP LIỆU (Màu xanh đậm) */
+        /* Ô NHẬP LIỆU: Xanh đậm */
         .salary-table input { 
             border: none; text-align: right; font-weight: bold; 
             font-size: 15px; background: #fffdf0; width: 100%; 
             padding: 4px; box-sizing: border-box; color: #00008B; 
         }
         
-        /* Ô TỰ ĐỘNG TÍNH (Màu đen) */
+        /* Ô TỰ ĐỘNG: Đen */
         .auto-calc { font-weight: bold; text-align: right; color: #000000; padding-right: 5px; }
         
         .btn-save { background-color: #28a745; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; width: 100%; font-size: 16px; margin-bottom: 10px; cursor: pointer; }
         .final-row { background-color: var(--yellow-bg); font-weight: bold; }
-        .bh-row { color: #666; font-size: 0.95em; font-style: italic; }
     </style>
 </head>
 <body>
@@ -70,12 +68,12 @@
             <tr><td class="label-cell">PC C.Việc</td><td><input type="text" id="in-pc-congviec" value="750,000" oninput="formatInput(this); calculate()"></td></tr>
             <tr><td class="label-cell">PC Thâm niên</td><td><input type="text" id="in-pc-thamnien" value="590,000" oninput="formatInput(this); calculate()"></td></tr>
             
-            <tr class="bh-row"><td class="label-cell">BHXH (8%)</td><td id="lbl-bhxh" class="auto-calc" style="font-style: normal;">0</td></tr>
-            <tr class="bh-row"><td class="label-cell">BHYT (1.5%)</td><td id="lbl-bhyt" class="auto-calc" style="font-style: normal;">0</td></tr>
-            <tr class="bh-row"><td class="label-cell">BHTN (1%)</td><td id="lbl-bhtn" class="auto-calc" style="font-style: normal;">0</td></tr>
+            <tr style="color: #666;"><td class="label-cell">BHXH (8%)</td><td id="lbl-bhxh" class="auto-calc">0</td></tr>
+            <tr style="color: #666;"><td class="label-cell">BHYT (1.5%)</td><td id="lbl-bhyt" class="auto-calc">0</td></tr>
+            <tr style="color: #666;"><td class="label-cell">BHTN (1%)</td><td id="lbl-bhtn" class="auto-calc">0</td></tr>
             
             <tr class="final-row">
-                <td class="label-cell" style="font-size: 15px;">THỰC NHẬN</td>
+                <td class="label-cell">THỰC NHẬN</td>
                 <td id="lbl-total" class="auto-calc" style="color: #d9534f; font-size: 1.1em;">0</td>
             </tr>
         </table>
@@ -86,11 +84,11 @@
     const daysOfWeek = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
     function formatNumber(n) {
-        return n.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return n.toString().replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
     function parseNumber(s) {
-        return parseFloat(s.replace(/,/g, "")) || 0;
+        return parseFloat(s.toString().replace(/,/g, "")) || 0;
     }
 
     function formatInput(el) {
@@ -173,18 +171,21 @@
         const pccv_viec = parseNumber(document.getElementById('in-pc-congviec').value);
         const pctn = parseNumber(document.getElementById('in-pc-thamnien').value);
 
-        // LƯƠNG GIỜ MỚI: (LCB / 192) * Tổng Thường
+        // Tổng lương làm căn cứ tính Bảo hiểm
+        const luongCanCuBH = lcb + pccv + pccv_viec + pctn;
+
+        // Lương giờ thực tế hiển thị: (LCB / 192) * Tổng Thường
         const luongGioThucTe = (lcb / 192) * tNT;
         document.getElementById('lbl-luong-gio').innerText = Math.round(luongGioThucTe).toLocaleString();
 
-        // ĐƠN GIÁ TÍNH OVT: (LCB + PC)/192
-        const donGiaGio = (lcb + pccv + pccv_viec + pctn) / 192;
+        // Đơn giá tính OVT: (Tổng thu nhập)/192
+        const donGiaGio = luongCanCuBH / 192;
         const tienOvt = Math.round((donGiaGio * oNT * 1.5) + (donGiaGio * tCN * 2));
         
-        // BẢO HIỂM
-        const bhxh = Math.round(lcb * 0.08);
-        const bhyt = Math.round(lcb * 0.015);
-        const bhtn = Math.round(lcb * 0.01);
+        // BẢO HIỂM MỚI: Tính trên (LCB + 3 PC)
+        const bhxh = Math.round(luongCanCuBH * 0.08);
+        const bhyt = Math.round(luongCanCuBH * 0.015);
+        const bhtn = Math.round(luongCanCuBH * 0.01);
         const tongBH = bhxh + bhyt + bhtn;
 
         document.getElementById('lbl-bhxh').innerText = bhxh.toLocaleString();

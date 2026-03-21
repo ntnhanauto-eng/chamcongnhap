@@ -24,6 +24,7 @@
         .salary-table td { padding: 8px; border: 1px solid #ddd; }
         .btn-save { background-color: #28a745; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; width: 100%; font-size: 16px; margin-bottom: 10px; cursor: pointer; }
         .final-row { background-color: var(--yellow-bg); font-weight: bold; font-size: 1.15em; }
+        .bh-row { color: #666; font-size: 0.9em; font-style: italic; }
     </style>
 </head>
 <body>
@@ -54,10 +55,11 @@
             <tr><td class="label-cell">PC Chức vụ</td><td><input type="text" id="in-pc-chucvu" value="1,600,000" oninput="formatInput(this); calculate()"></td></tr>
             <tr><td class="label-cell">PC C.Việc</td><td><input type="text" id="in-pc-congviec" value="750,000" oninput="formatInput(this); calculate()"></td></tr>
             <tr><td class="label-cell">PC Thâm niên</td><td><input type="text" id="in-pc-thamnien" value="590,000" oninput="formatInput(this); calculate()"></td></tr>
-            <tr style="color: #666; font-size: 0.9em;">
-                <td class="label-cell">Bảo hiểm (10.5%)</td>
-                <td id="lbl-bh-total" style="text-align:right;">0</td>
-            </tr>
+            
+            <tr class="bh-row"><td class="label-cell">BHXH (8%)</td><td id="lbl-bhxh" style="text-align:right;">0</td></tr>
+            <tr class="bh-row"><td class="label-cell">BHYT (1.5%)</td><td id="lbl-bhyt" style="text-align:right;">0</td></tr>
+            <tr class="bh-row"><td class="label-cell">BHTN (1%)</td><td id="lbl-bhtn" style="text-align:right;">0</td></tr>
+            
             <tr class="final-row">
                 <td class="label-cell">THỰC NHẬN</td>
                 <td id="lbl-total" style="color: #d9534f; text-align:right;">0</td>
@@ -69,21 +71,17 @@
 <script>
     const daysOfWeek = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
-    // Hàm định dạng hiển thị hàng nghìn
     function formatNumber(n) {
         return n.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
-    // Hàm chuyển chuỗi có dấu phẩy về số để tính toán
     function parseNumber(s) {
         return parseFloat(s.replace(/,/g, "")) || 0;
     }
 
     function formatInput(el) {
         let val = el.value.replace(/,/g, "");
-        if (!isNaN(val) && val !== "") {
-            el.value = formatNumber(val);
-        }
+        if (!isNaN(val) && val !== "") { el.value = formatNumber(val); }
     }
 
     function init() {
@@ -161,19 +159,27 @@
         const pccv_viec = parseNumber(document.getElementById('in-pc-congviec').value);
         const pctn = parseNumber(document.getElementById('in-pc-thamnien').value);
 
-        // LƯƠNG GIỜ MỚI: (LCB / 192) * Tổng Thường
+        // Lương giờ thực tế hiển thị
         const luongGioThucTe = (lcb / 192) * tNT;
         document.getElementById('lbl-luong-gio').innerText = Math.round(luongGioThucTe).toLocaleString();
 
-        // CÔNG THỨC THÊM GIỜ CŨ (Sử dụng đơn giá từ (LCB+PC)/192)
+        // Đơn giá tính OVT
         const donGiaGio = (lcb + pccv + pccv_viec + pctn) / 192;
         const tienOvt = Math.round((donGiaGio * oNT * 1.5) + (donGiaGio * tCN * 2));
         
-        const bh = Math.round(lcb * 0.105);
-        const final = (lcb + tienOvt + pccv + pctn + pccv_viec) - bh;
+        // TÍNH BẢO HIỂM CHI TIẾT (Trích từ LCB)
+        const bhxh = Math.round(lcb * 0.08);
+        const bhyt = Math.round(lcb * 0.015);
+        const bhtn = Math.round(lcb * 0.01);
+        const tongBH = bhxh + bhyt + bhtn;
+
+        document.getElementById('lbl-bhxh').innerText = bhxh.toLocaleString();
+        document.getElementById('lbl-bhyt').innerText = bhyt.toLocaleString();
+        document.getElementById('lbl-bhtn').innerText = bhtn.toLocaleString();
+
+        const final = (lcb + tienOvt + pccv + pctn + pccv_viec) - tongBH;
 
         document.getElementById('lbl-ovt-money').innerText = tienOvt.toLocaleString();
-        document.getElementById('lbl-bh-total').innerText = bh.toLocaleString();
         document.getElementById('lbl-total').innerText = final.toLocaleString() + " ₫";
     }
 

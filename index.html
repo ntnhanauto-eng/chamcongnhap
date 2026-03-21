@@ -171,18 +171,18 @@
         const pccv_viec = parseNumber(document.getElementById('in-pc-congviec').value);
         const pctn = parseNumber(document.getElementById('in-pc-thamnien').value);
 
-        // Tổng lương làm căn cứ tính Bảo hiểm
         const luongCanCuBH = lcb + pccv + pccv_viec + pctn;
 
-        // Lương giờ thực tế hiển thị: (LCB / 192) * Tổng Thường
-        const luongGioThucTe = (lcb / 192) * tNT;
-        document.getElementById('lbl-luong-gio').innerText = Math.round(luongGioThucTe).toLocaleString();
+        // 1. Tính Lương giờ: (LCB / 192) * Tổng Thường
+        const luongGioThucTe = Math.round((lcb / 192) * tNT);
+        document.getElementById('lbl-luong-gio').innerText = luongGioThucTe.toLocaleString();
 
-        // Đơn giá tính OVT: (Tổng thu nhập)/192
+        // 2. Tính Thêm giờ: ((Tổng thu nhập)/192) * (OVT*1.5 + CN*2)
         const donGiaGio = luongCanCuBH / 192;
-        const tienOvt = Math.round((donGiaGio * oNT * 1.5) + (donGiaGio * tCN * 2));
+        const tienThemGio = Math.round((donGiaGio * oNT * 1.5) + (donGiaGio * tCN * 2));
+        document.getElementById('lbl-ovt-money').innerText = tienThemGio.toLocaleString();
         
-        // BẢO HIỂM MỚI: Tính trên (LCB + 3 PC)
+        // 3. Tính 3 loại Bảo hiểm
         const bhxh = Math.round(luongCanCuBH * 0.08);
         const bhyt = Math.round(luongCanCuBH * 0.015);
         const bhtn = Math.round(luongCanCuBH * 0.01);
@@ -192,10 +192,9 @@
         document.getElementById('lbl-bhyt').innerText = bhyt.toLocaleString();
         document.getElementById('lbl-bhtn').innerText = bhtn.toLocaleString();
 
-        const final = (lcb + tienOvt + pccv + pctn + pccv_viec) - tongBH;
-
-        document.getElementById('lbl-ovt-money').innerText = tienOvt.toLocaleString();
-        document.getElementById('lbl-total').innerText = final.toLocaleString() + " ₫";
+        // 4. THỰC NHẬN = (Lương giờ + Thêm giờ + 3 loại PC) - 3 loại Bảo hiểm
+        const thucNhan = (luongGioThucTe + tienThemGio + pccv + pctn + pccv_viec) - tongBH;
+        document.getElementById('lbl-total').innerText = thucNhan.toLocaleString() + " ₫";
     }
 
     function saveData() {

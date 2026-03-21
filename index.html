@@ -10,6 +10,7 @@
         .container { max-width: 100%; margin: auto; background: white; padding: 12px; border-radius: 8px; }
         .setup-section { background: #f8f9fa; padding: 8px; border-radius: 6px; margin-bottom: 12px; display: flex; gap: 10px; border: 1px solid #ddd; }
         select, input { padding: 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 15px; }
+        
         .table-responsive { width: 100%; overflow-x: auto; margin-bottom: 15px; border: 1px solid var(--border-color); }
         table { width: 100%; min-width: 340px; border-collapse: collapse; table-layout: fixed; }
         th, td { border: 1px solid var(--border-color); text-align: center; padding: 4px 1px; }
@@ -18,13 +19,26 @@
         .total-cell { background-color: #eee; font-weight: bold; width: 45px; font-size: 12px; }
         .sun-column { background-color: #fff0f0; color: red; }
         input.cell-input { width: 100%; border: none; text-align: center; font-size: 16px; outline: none; background: transparent; font-weight: bold; padding: 2px 0; }
+
         .summary-wrapper { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; border-top: 2px solid #eee; padding-top: 15px; }
-        .salary-table { width: 100%; border: 1px solid var(--border-color); }
-        .salary-table input { border: none; text-align: right; font-weight: bold; font-size: 15px; background: #fffdf0; width: 100%; padding: 4px; box-sizing: border-box; }
-        .salary-table td { padding: 8px; border: 1px solid #ddd; }
+        
+        /* BẢNG LƯƠNG CHI TIẾT */
+        .salary-table { width: 100%; border: 1px solid var(--border-color); border-collapse: collapse; }
+        .salary-table td { padding: 8px; border: 1px solid #ddd; font-size: 15px; } /* Cỡ chữ bằng LCB */
+        
+        /* Ô NHẬP LIỆU (Màu xanh đậm) */
+        .salary-table input { 
+            border: none; text-align: right; font-weight: bold; 
+            font-size: 15px; background: #fffdf0; width: 100%; 
+            padding: 4px; box-sizing: border-box; color: #00008B; 
+        }
+        
+        /* Ô TỰ ĐỘNG TÍNH (Màu đen) */
+        .auto-calc { font-weight: bold; text-align: right; color: #000000; padding-right: 5px; }
+        
         .btn-save { background-color: #28a745; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; width: 100%; font-size: 16px; margin-bottom: 10px; cursor: pointer; }
-        .final-row { background-color: var(--yellow-bg); font-weight: bold; font-size: 1.15em; }
-        .bh-row { color: #666; font-size: 0.9em; font-style: italic; }
+        .final-row { background-color: var(--yellow-bg); font-weight: bold; }
+        .bh-row { color: #666; font-size: 0.95em; font-style: italic; }
     </style>
 </head>
 <body>
@@ -42,7 +56,7 @@
     <div class="summary-wrapper">
         <button class="btn-save" onclick="saveData()">LƯU DỮ LIỆU</button>
         
-        <table style="width: 100%; margin-bottom: 5px;">
+        <table style="width: 100%; margin-bottom: 5px; border: 1px solid #444;">
             <tr><td class="label-cell" style="background:var(--green-bg)">Tổng Thường</td><td id="res-thuong" style="font-weight:bold; text-align:right; padding-right:10px">0</td></tr>
             <tr><td class="label-cell" style="background:var(--orange-bg)">Tổng OVT</td><td id="res-ovt" style="font-weight:bold; text-align:right; padding-right:10px">0</td></tr>
             <tr><td class="label-cell" style="background:#ffdada; color:red;">Tổng CN</td><td id="res-cn" style="font-weight:bold; text-align:right; padding-right:10px; color:red;">0</td></tr>
@@ -50,19 +64,19 @@
 
         <table class="salary-table">
             <tr><td class="label-cell" style="width:120px">LCB</td><td><input type="text" id="in-lcb" value="11,110,000" oninput="formatInput(this); calculate()"></td></tr>
-            <tr style="background: #f9f9f9;"><td class="label-cell">Lương giờ</td><td id="lbl-luong-gio" style="font-weight:bold; text-align:right; color: #333;">0</td></tr>
-            <tr><td class="label-cell">Thêm giờ</td><td id="lbl-ovt-money" style="font-weight:bold; text-align:right; color: blue;">0</td></tr>
+            <tr style="background: #f9f9f9;"><td class="label-cell">Lương giờ</td><td id="lbl-luong-gio" class="auto-calc">0</td></tr>
+            <tr><td class="label-cell">Thêm giờ</td><td id="lbl-ovt-money" class="auto-calc">0</td></tr>
             <tr><td class="label-cell">PC Chức vụ</td><td><input type="text" id="in-pc-chucvu" value="1,600,000" oninput="formatInput(this); calculate()"></td></tr>
             <tr><td class="label-cell">PC C.Việc</td><td><input type="text" id="in-pc-congviec" value="750,000" oninput="formatInput(this); calculate()"></td></tr>
             <tr><td class="label-cell">PC Thâm niên</td><td><input type="text" id="in-pc-thamnien" value="590,000" oninput="formatInput(this); calculate()"></td></tr>
             
-            <tr class="bh-row"><td class="label-cell">BHXH (8%)</td><td id="lbl-bhxh" style="text-align:right;">0</td></tr>
-            <tr class="bh-row"><td class="label-cell">BHYT (1.5%)</td><td id="lbl-bhyt" style="text-align:right;">0</td></tr>
-            <tr class="bh-row"><td class="label-cell">BHTN (1%)</td><td id="lbl-bhtn" style="text-align:right;">0</td></tr>
+            <tr class="bh-row"><td class="label-cell">BHXH (8%)</td><td id="lbl-bhxh" class="auto-calc" style="font-style: normal;">0</td></tr>
+            <tr class="bh-row"><td class="label-cell">BHYT (1.5%)</td><td id="lbl-bhyt" class="auto-calc" style="font-style: normal;">0</td></tr>
+            <tr class="bh-row"><td class="label-cell">BHTN (1%)</td><td id="lbl-bhtn" class="auto-calc" style="font-style: normal;">0</td></tr>
             
             <tr class="final-row">
-                <td class="label-cell">THỰC NHẬN</td>
-                <td id="lbl-total" style="color: #d9534f; text-align:right;">0</td>
+                <td class="label-cell" style="font-size: 15px;">THỰC NHẬN</td>
+                <td id="lbl-total" class="auto-calc" style="color: #d9534f; font-size: 1.1em;">0</td>
             </tr>
         </table>
     </div>
@@ -159,15 +173,15 @@
         const pccv_viec = parseNumber(document.getElementById('in-pc-congviec').value);
         const pctn = parseNumber(document.getElementById('in-pc-thamnien').value);
 
-        // Lương giờ thực tế hiển thị
+        // LƯƠNG GIỜ MỚI: (LCB / 192) * Tổng Thường
         const luongGioThucTe = (lcb / 192) * tNT;
         document.getElementById('lbl-luong-gio').innerText = Math.round(luongGioThucTe).toLocaleString();
 
-        // Đơn giá tính OVT
+        // ĐƠN GIÁ TÍNH OVT: (LCB + PC)/192
         const donGiaGio = (lcb + pccv + pccv_viec + pctn) / 192;
         const tienOvt = Math.round((donGiaGio * oNT * 1.5) + (donGiaGio * tCN * 2));
         
-        // TÍNH BẢO HIỂM CHI TIẾT (Trích từ LCB)
+        // BẢO HIỂM
         const bhxh = Math.round(lcb * 0.08);
         const bhyt = Math.round(lcb * 0.015);
         const bhtn = Math.round(lcb * 0.01);

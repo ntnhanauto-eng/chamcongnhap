@@ -49,7 +49,7 @@
 
         <table class="salary-table">
             <tr><td class="label-cell" style="width:120px">LCB</td><td><input type="number" id="in-lcb" value="11110000" oninput="calculate()"></td></tr>
-            <tr><td class="label-cell">Thêm giờ</td><td id="lbl-ovt-money" style="font-weight:bold; text-align:right;">0</td></tr>
+            <tr><td class="label-cell">Thêm giờ</td><td id="lbl-ovt-money" style="font-weight:bold; text-align:right; color: blue;">0</td></tr>
             <tr><td class="label-cell">PC Chức vụ</td><td><input type="number" id="in-pc-chucvu" value="1600000" oninput="calculate()"></td></tr>
             <tr><td class="label-cell">PC C.Việc</td><td><input type="number" id="in-pc-congviec" value="750000" oninput="calculate()"></td></tr>
             <tr><td class="label-cell">PC Thâm niên</td><td><input type="number" id="in-pc-thamnien" value="590000" oninput="calculate()"></td></tr>
@@ -106,7 +106,6 @@
                     dRow += '<td></td>'; tRow += '<td></td>'; oRow += '<td></td>';
                 } else {
                     dRow += `<td class="${isSun ? 'sun-column' : ''}">${dayCounter}</td>`;
-                    // Đánh dấu ô CN bằng class 'is-sun' cho cả 2 hàng
                     tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                     oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                     dayCounter++;
@@ -122,64 +121,65 @@
         loadSavedData(); calculate();
     }
 
-    // HÀM TÍNH TOÁN THEO CÔNG THỨC MỚI
     function calculate() {
         let totalThuongNgayThuong = 0;
         let totalOVTNgayThuong = 0;
         let totalChuNhat = 0;
 
         document.querySelectorAll('.table-responsive').forEach(wrap => {
-            let weeklyT = 0; // Tổng thường cả tuần (bao gồm CN)
-            let weeklyO = 0; // Tổng OVT cả tuần (bao gồm CN)
+            let weeklyT = 0;
+            let weeklyO = 0;
             
-            // Duyệt hàng Thường
             wrap.querySelectorAll('.in-t').forEach(input => {
                 let val = Number(input.value) || 0;
                 weeklyT += val;
                 if (input.classList.contains('is-sun')) {
-                    totalChuNhat += val; // Nếu là Thường CN -> cộng vào Tổng CN
+                    totalChuNhat += val;
                 } else {
-                    totalThuongNgayThuong += val; // Nếu là Thường ngày thường -> cộng vào Tổng Thường
+                    totalThuongNgayThuong += val;
                 }
             });
 
-            // Duyệt hàng OVT
             wrap.querySelectorAll('.in-o').forEach(input => {
                 let val = Number(input.value) || 0;
                 weeklyO += val;
                 if (input.classList.contains('is-sun')) {
-                    totalChuNhat += val; // Nếu là OVT CN -> cộng vào Tổng CN
+                    totalChuNhat += val;
                 } else {
-                    totalOVTNgayThuong += val; // Nếu là OVT ngày thường -> cộng vào Tổng OVT
+                    totalOVTNgayThuong += val;
                 }
             });
 
-            // Cập nhật cột TỔNG ở cuối mỗi tuần (giữ nguyên hiển thị tổng cộng của tuần)
             wrap.querySelector('.w-t').innerText = weeklyT;
             wrap.querySelector('.w-o').innerText = weeklyO;
         });
 
-        // Đổ dữ liệu ra bảng tổng hợp theo đúng công thức yêu cầu
         document.getElementById('res-thuong').innerText = totalThuongNgayThuong;
         document.getElementById('res-ovt').innerText = totalOVTNgayThuong;
         document.getElementById('res-cn').innerText = totalChuNhat;
 
-        // TÍNH LƯƠNG (Dựa trên tổng OVT ngày thường + tổng công CN)
+        // Lấy các giá trị phụ cấp
         const lcb = Number(document.getElementById('in-lcb').value) || 0;
         const pccv = Number(document.getElementById('in-pc-chucvu').value) || 0;
-        const pctn = Number(document.getElementById('in-pc-thamnien').value) || 0;
         const pccviec = Number(document.getElementById('in-pc-congviec').value) || 0;
+        const pctn = Number(document.getElementById('in-pc-thamnien').value) || 0;
 
-        const luongGio = Math.round(lcb / 208);
+        // TÍNH TOÁN THEO CÔNG THỨC YÊU CẦU
+        // Lương giờ cơ bản = (LCB + PC chức vụ + PC công việc + PC thâm niên) / 192
+        const luongGio = (lcb + pccv + pccviec + pctn) / 192;
         
-        // Tiền thêm giờ = (Tổng OVT ngày thường * 1.5) + (Tổng CN * 2.0)
-        // Lưu ý: Tôi giả định CN nhân hệ số 2.0, bạn có thể chỉnh con số này
-        const tienOvt = Math.round((totalOVTNgayThuong * luongGio * 1.5) + (totalChuNhat * luongGio * 2.0));
+        // Tiền Thêm giờ = (Lương giờ * Tổng OVT ngày thường * 1.5) + (Lương giờ * Tổng CN * 2)
+        const tienOvtNgayThuong = luongGio * totalOVTNgayThuong * 1.5;
+        const tienOvtChuNhat = luongGio * totalChuNhat * 2;
+        const tongTienThemGio = Math.round(tienOvtNgayThuong + tienOvtChuNhat);
         
+        // Bảo hiểm (chỉ tính trên LCB theo logic cũ của bạn)
         const bhTotal = Math.round(lcb * 0.105);
-        const final = (lcb + tienOvt + pccv + pctn + pccviec) - bhTotal;
+        
+        // Thực nhận = (LCB + Tiền thêm giờ + Các phụ cấp) - Bảo hiểm
+        const final = (lcb + tongTienThemGio + pccv + pctn + pccviec) - bhTotal;
 
-        document.getElementById('lbl-ovt-money').innerText = tienOvt.toLocaleString();
+        document.getElementById('lbl-ovt-money').innerText = tongTienThemGio.toLocaleString();
         document.getElementById('lbl-bh-total').innerText = bhTotal.toLocaleString();
         document.getElementById('lbl-total').innerText = final.toLocaleString() + " ₫";
     }

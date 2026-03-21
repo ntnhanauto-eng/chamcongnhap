@@ -49,7 +49,7 @@
 
         <table class="salary-table">
             <tr><td class="label-cell" style="width:120px">LCB</td><td><input type="text" id="in-lcb" value="11,110,000" oninput="formatInput(this); calculate()"></td></tr>
-            <tr style="background: #f0f8ff;"><td class="label-cell">Lương giờ</td><td id="lbl-luong-gio" style="font-weight:bold; text-align:right; color: #333;">0</td></tr>
+            <tr style="background: #f9f9f9;"><td class="label-cell">Lương giờ</td><td id="lbl-luong-gio" style="font-weight:bold; text-align:right; color: #333;">0</td></tr>
             <tr><td class="label-cell">Thêm giờ</td><td id="lbl-ovt-money" style="font-weight:bold; text-align:right; color: blue;">0</td></tr>
             <tr><td class="label-cell">PC Chức vụ</td><td><input type="text" id="in-pc-chucvu" value="1,600,000" oninput="formatInput(this); calculate()"></td></tr>
             <tr><td class="label-cell">PC C.Việc</td><td><input type="text" id="in-pc-congviec" value="750,000" oninput="formatInput(this); calculate()"></td></tr>
@@ -69,10 +69,12 @@
 <script>
     const daysOfWeek = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
+    // Hàm định dạng hiển thị hàng nghìn
     function formatNumber(n) {
         return n.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
+    // Hàm chuyển chuỗi có dấu phẩy về số để tính toán
     function parseNumber(s) {
         return parseFloat(s.replace(/,/g, "")) || 0;
     }
@@ -159,11 +161,14 @@
         const pccv_viec = parseNumber(document.getElementById('in-pc-congviec').value);
         const pctn = parseNumber(document.getElementById('in-pc-thamnien').value);
 
-        // Lương giờ = (LCB + PC Chức vụ + PC Công việc + PC Thâm niên) / 192
-        const luongGio = (lcb + pccv + pccv_viec + pctn) / 192;
-        document.getElementById('lbl-luong-gio').innerText = Math.round(luongGio).toLocaleString();
+        // LƯƠNG GIỜ MỚI: (LCB / 192) * Tổng Thường
+        const luongGioThucTe = (lcb / 192) * tNT;
+        document.getElementById('lbl-luong-gio').innerText = Math.round(luongGioThucTe).toLocaleString();
 
-        const tienOvt = Math.round((luongGio * oNT * 1.5) + (luongGio * tCN * 2));
+        // CÔNG THỨC THÊM GIỜ CŨ (Sử dụng đơn giá từ (LCB+PC)/192)
+        const donGiaGio = (lcb + pccv + pccv_viec + pctn) / 192;
+        const tienOvt = Math.round((donGiaGio * oNT * 1.5) + (donGiaGio * tCN * 2));
+        
         const bh = Math.round(lcb * 0.105);
         const final = (lcb + tienOvt + pccv + pctn + pccv_viec) - bh;
 

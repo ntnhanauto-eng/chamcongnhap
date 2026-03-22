@@ -38,20 +38,57 @@
         /* Ô TỰ ĐỘNG: Đen */
         .auto-calc { font-weight: bold; text-align: right; color: #000000; padding-right: 5px; }
         
-       .button-group {
+      .button-group {
     display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 8px; /* Khoảng cách giữa các nút */
+    margin-bottom: 15px;
+    width: 100%;
 }
 
-        
-.btn-save { 
-    background-color: #28a745; color: white; padding: 12px; border: none; 
-    border-radius: 6px; font-weight: bold; flex: 3; font-size: 16px; cursor: pointer; 
+/* Nút LƯU: Kéo giãn tối đa */
+.btn-save {
+    flex: 5; 
+    background-color: #28a745;
+    color: white;
+    padding: 12px 5px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap; /* Không cho chữ xuống dòng */
 }
-.btn-reset { 
-    background-color: #6c757d; color: white; padding: 12px; border: none; 
-    border-radius: 6px; font-weight: bold; flex: 1; font-size: 14px; cursor: pointer; 
+
+/* Nút XUẤT ẢNH: Chiều rộng vừa phải */
+.btn-export {
+    flex: 2.5;
+    background-color: #007bff;
+    color: white;
+    padding: 12px 5px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+/* Nút RESET: Nhỏ nhất */
+.btn-reset {
+    flex: 1.5;
+    background-color: #6c757d;
+    color: white;
+    padding: 12px 5px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+/* Hiệu ứng khi nhấn (tùy chọn thêm cho chuyên nghiệp) */
+.button-group button:active {
+    opacity: 0.8;
+    transform: scale(0.98);
 }
         
         .final-row { background-color: var(--yellow-bg); font-weight: bold; }

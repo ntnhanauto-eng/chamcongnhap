@@ -373,7 +373,7 @@ function getLunarDay(day, month, year) {
         document.getElementById('lbl-total').innerText = thucNhan.toLocaleString() + " ₫";
     }
 
-   function saveData() {
+  function saveData() {
     const m = document.getElementById('month-select').value;
     const y = document.getElementById('year-select').value;
     const userName = document.getElementById('user-name').value;
@@ -383,10 +383,15 @@ function getLunarDay(day, month, year) {
         return;
     }
 
-    const data = { thuong: {}, ovt: {}, note: {}, salary: {} }; // Thêm note ở đây
+    // Khởi tạo đối tượng data bao gồm cả phần note
+    const data = { thuong: {}, ovt: {}, note: {}, salary: {} };
+
+    // Lưu giờ thường
     document.querySelectorAll('.in-t').forEach(i => { if(i.dataset.day) data.thuong[i.dataset.day] = i.value });
+    // Lưu giờ OVT
     document.querySelectorAll('.in-o').forEach(i => { if(i.dataset.day) data.ovt[i.dataset.day] = i.value });
-    document.querySelectorAll('.in-n').forEach(i => { if(i.dataset.day) data.note[i.dataset.day] = i.value }); // Lưu ghi chú
+    // QUAN TRỌNG: Lưu nội dung ghi chú
+    document.querySelectorAll('.in-n').forEach(i => { if(i.dataset.day) data.note[i.dataset.day] = i.value });
     
     data.salary = { 
         lcb: document.getElementById('in-lcb').value, 
@@ -397,7 +402,8 @@ function getLunarDay(day, month, year) {
 
     localStorage.setItem(`hvs_data_${y}_${m}`, JSON.stringify(data));
     localStorage.setItem('hvs_user_name', userName);
-    alert("Đã lưu dữ liệu cho " + userName + "!");
+    
+    alert("Đã lưu dữ liệu và ghi chú!");
 }
 
 function resetData() {
@@ -419,15 +425,27 @@ function resetData() {
 }
 
     
-  function loadSavedData() {
+ function loadSavedData() {
     const m = document.getElementById('month-select').value;
     const y = document.getElementById('year-select').value;
     const saved = localStorage.getItem(`hvs_data_${y}_${m}`);
+    
     if (saved) {
         const d = JSON.parse(saved);
+        
+        // Đổ dữ liệu giờ thường
         document.querySelectorAll('.in-t').forEach(i => { if(d.thuong && d.thuong[i.dataset.day]) i.value = d.thuong[i.dataset.day] });
+        // Đổ dữ liệu OVT
         document.querySelectorAll('.in-o').forEach(i => { if(d.ovt && d.ovt[i.dataset.day]) i.value = d.ovt[i.dataset.day] });
-        document.querySelectorAll('.in-n').forEach(i => { if(d.note && d.note[i.dataset.day]) i.value = d.note[i.dataset.day] }); // Load ghi chú
+        
+        // QUAN TRỌNG: Đổ dữ liệu ghi chú vào lại các ô .in-n
+        document.querySelectorAll('.in-n').forEach(i => { 
+            if(d.note && d.note[i.dataset.day]) {
+                i.value = d.note[i.dataset.day];
+            } else {
+                i.value = ""; // Xóa trắng nếu tháng này chưa có ghi chú
+            }
+        });
         
         if(d.salary) {
             document.getElementById('in-lcb').value = d.salary.lcb || "";
@@ -435,6 +453,9 @@ function resetData() {
             document.getElementById('in-pc-congviec').value = d.salary.pccviec || "";
             document.getElementById('in-pc-thamnien').value = d.salary.pctn || "";
         }
+    } else {
+        // Nếu tháng hoàn toàn mới, xóa trắng toàn bộ ghi chú cũ của tháng trước
+        document.querySelectorAll('.in-n').forEach(i => i.value = "");
     }
 }
     window.onload = init;

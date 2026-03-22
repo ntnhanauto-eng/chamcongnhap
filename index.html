@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CHẤM CÔNG</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <style>
         :root { --green-bg: #c6e0b4; --yellow-bg: #ffe699; --orange-bg: #f8cbad; --border-color: #444; }
         body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 8px; background-color: #f0f2f5; font-size: 13px; }
@@ -121,6 +124,12 @@
     <div class="summary-wrapper">
        <div class="button-group">
     <button class="btn-save" onclick="saveData()">LƯU DỮ LIỆU</button>
+           
+    <div class="button-group">
+    <button class="btn-save" onclick="saveData()">LƯU</button>
+    <button class="btn-export" onclick="exportImage()" style="background:#007bff; color:white; border:none; border-radius:6px; flex:2; font-weight:bold; cursor:pointer;">XUẤT ẢNH</button>
+    <button class="btn-reset" onclick="resetData()">RESET</button>
+</div>       
     <button class="btn-reset" onclick="resetData()">RESET</button>
 </div>
         
@@ -391,6 +400,47 @@ function saveData() {
 }
 
 
+function exportImage() {
+    // Hiển thị thông báo đang xử lý
+    const btn = document.querySelector('.btn-export');
+    const originalText = btn.innerText;
+    btn.innerText = "ĐANG TẠO...";
+    btn.disabled = true;
+
+    // Chọn vùng muốn chụp (toàn bộ class container)
+    const element = document.querySelector('.container');
+
+    html2canvas(element, {
+        scale: 2, // Tăng chất lượng ảnh (độ nét gấp 2)
+        useCORS: true,
+        backgroundColor: "#f0f2f5" // Màu nền bao quanh
+    }).then(canvas => {
+        // Chuyển canvas thành đường dẫn ảnh
+        const imageData = canvas.toDataURL("image/png");
+        
+        // Tạo một liên kết ảo để tải ảnh xuống
+        const link = document.createElement('a');
+        const month = document.getElementById('month-select').value;
+        const year = document.getElementById('year-select').value;
+        const name = document.getElementById('user-name').value || "Bang-Cong";
+        
+        link.download = `Cong_HVS_${name}_Thang_${Number(month)+1}_${year}.png`;
+        link.href = imageData;
+        link.click();
+
+        // Khôi phục trạng thái nút
+        btn.innerText = originalText;
+        btn.disabled = false;
+        
+        alert("Ảnh đã được tải xuống! Bạn có thể đính kèm vào Zalo để gửi.");
+    }).catch(err => {
+        console.error("Lỗi xuất ảnh:", err);
+        btn.innerText = originalText;
+        btn.disabled = false;
+    });
+}
+
+    
     
 </script>
 </body>

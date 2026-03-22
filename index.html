@@ -70,7 +70,11 @@
     box-shadow: 0 0 5px rgba(0,123,255,0.5); /* Đổ bóng nhẹ */
 }
 
-
+#user-name:focus {
+    outline: 2px solid #d9534f;
+    background-color: #fff;
+    box-shadow: 0 0 5px rgba(217, 83, 79, 0.5);
+}
 
         
     </style>
@@ -80,6 +84,11 @@
 <div class="container">
     <h2 style="text-align: center; margin: 0 0 10px 0; font-size: 1.1rem;">QUẢN LÝ CÔNG HVS</h2>
 
+<div style="text-align: center; margin-bottom: 15px;">
+    <input type="text" id="user-name" placeholder="Nhập họ tên của bạn..." 
+           style="width: 80%; padding: 8px; border: 1px solid #ccc; border-radius: 20px; text-align: center; font-weight: bold; color: #d9534f;">
+</div>
+    
     <div class="setup-section">
         <select id="month-select" onchange="renderCalendar()" style="flex:2"></select>
         <input type="number" id="year-select" value="2026" onchange="renderCalendar()" style="flex:1">
@@ -288,6 +297,69 @@ function resetData() {
         }
     }
     window.onload = init;
+
+// Thêm vào đầu phần Script hoặc trong hàm init
+function checkUserName() {
+    const savedName = localStorage.getItem('hvs_user_name');
+    const nameInput = document.getElementById('user-name');
+    
+    if (savedName) {
+        nameInput.value = savedName;
+    } else {
+        // Nếu mở lần đầu (chưa có tên trong localStorage)
+        let name = prompt("Chào mừng! Vui lòng nhập họ tên của bạn để bắt đầu:");
+        if (name && name.trim() !== "") {
+            nameInput.value = name;
+            localStorage.setItem('hvs_user_name', name);
+        }
+    }
+}
+
+// Cập nhật lại hàm init để gọi checkUserName
+function init() {
+    const monthSel = document.getElementById('month-select');
+    for(let i=0; i<12; i++) {
+        let opt = document.createElement('option');
+        opt.value = i; opt.text = "Tháng " + (i+1);
+        monthSel.add(opt);
+    }
+    monthSel.value = new Date().getMonth();
+    
+    checkUserName(); // Kiểm tra tên khi mở trang
+    renderCalendar();
+}
+
+// Cập nhật lại hàm saveData để lưu cả tên nếu người dùng có sửa
+function saveData() {
+    const m = document.getElementById('month-select').value;
+    const y = document.getElementById('year-select').value;
+    const userName = document.getElementById('user-name').value;
+    
+    if (!userName || userName.trim() === "") {
+        alert("Vui lòng nhập tên trước khi lưu!");
+        return;
+    }
+
+    const data = { thuong: {}, ovt: {}, salary: {} };
+    document.querySelectorAll('.in-t').forEach(i => { if(i.dataset.day) data.thuong[i.dataset.day] = i.value });
+    document.querySelectorAll('.in-o').forEach(i => { if(i.dataset.day) data.ovt[i.dataset.day] = i.value });
+    data.salary = { 
+        lcb: document.getElementById('in-lcb').value, 
+        pccv: document.getElementById('in-pc-chucvu').value, 
+        pccviec: document.getElementById('in-pc-congviec').value, 
+        pctn: document.getElementById('in-pc-thamnien').value 
+    };
+
+    // Lưu dữ liệu công tháng
+    localStorage.setItem(`hvs_data_${y}_${m}`, JSON.stringify(data));
+    // Lưu tên người dùng (cố định cho các lần sau)
+    localStorage.setItem('hvs_user_name', userName);
+    
+    alert("Đã lưu dữ liệu cho " + userName + "!");
+}
+
+
+    
 </script>
 </body>
 </html>

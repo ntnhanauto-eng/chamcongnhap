@@ -60,16 +60,19 @@
             padding: 5px;
         }
 
-        /* Ký hiệu nhận biết có nhiều dòng */
+       /* Đốm xanh thông báo có nhiều dòng */
         .has-multi-line::after {
-            content: "📑";
+            content: ""; /* Xóa icon cũ */
             position: absolute;
-            top: 1px;
-            right: 1px;
-            font-size: 8px;
-            color: #007bff;
+            top: 3px;
+            right: 3px;
+            width: 6px;   /* Độ rộng đốm tròn */
+            height: 6px;  /* Độ cao đốm tròn */
+            background-color: #28a745; /* Màu xanh lá (hoặc #007bff nếu Boss thích xanh dương) */
+            border-radius: 50%; /* Làm tròn thành dấu chấm */
             z-index: 2;
             pointer-events: none;
+            box-shadow: 0 0 2px rgba(0,0,0,0.2);
         }
 
         .summary-wrapper { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; border-top: 2px solid #eee; padding-top: 15px; }
@@ -351,23 +354,26 @@
     window.onload = init;
 
 function checkLines(el) {
-    // Kiểm tra nếu có ký tự xuống dòng hoặc độ dài văn bản quá dài
+    // Nếu nội dung có dấu xuống dòng (\n) thì hiện đốm xanh
     const hasNewLine = el.value.includes('\n');
     const parent = el.parentElement;
-    if (hasNewLine) {
+    
+    if (hasNewLine && el.value.trim() !== "") {
         parent.classList.add('has-multi-line');
     } else {
         parent.classList.remove('has-multi-line');
     }
 }
 
-// Cập nhật lại hàm loadSavedData để hiện icon ngay khi load trang
+// Cập nhật lại hàm load để quét dữ liệu cũ khi vừa mở trang
 const oldLoadSavedData = loadSavedData;
 loadSavedData = function() {
     oldLoadSavedData();
-    document.querySelectorAll('.in-n').forEach(el => checkLines(el));
+    // Đợi 1 chút để dữ liệu điền vào các ô rồi mới kiểm tra dòng
+    setTimeout(() => {
+        document.querySelectorAll('.in-n').forEach(el => checkLines(el));
+    }, 100);
 }
-
 
 
     

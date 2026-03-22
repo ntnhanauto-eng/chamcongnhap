@@ -15,7 +15,24 @@
         table { width: 100%; min-width: 340px; border-collapse: collapse; table-layout: fixed; }
         th, td { border: 1px solid var(--border-color); text-align: center; padding: 4px 1px; }
         .header-green { background-color: var(--green-bg); font-weight: bold; font-size: 12px; }
-        .label-cell { text-align: left; padding-left: 5px; font-weight: bold; width: 65px; background: #fdfdfd; font-size: 12px; }
+       /* Tìm và thay thế đoạn này trong CSS của bạn */
+.label-cell { 
+    text-align: left; 
+    padding-left: 3px; /* Giảm padding để tiết kiệm diện tích */
+    font-weight: bold; 
+    width: 50px; /* Đã thu nhỏ từ 65px xuống 50px */
+    background: #fdfdfd; 
+    font-size: 11px; /* Giảm 1px để không bị nhảy dòng chữ */
+    white-space: nowrap; /* Giữ chữ trên một dòng */
+}
+
+/* Thêm thuộc tính này vào table để các cột tự chia đều không gian còn lại */
+table { 
+    width: 100%; 
+    min-width: 340px; 
+    border-collapse: collapse; 
+    table-layout: auto; /* Đổi từ fixed sang auto để các cột số rộng hơn */
+}
         .total-cell { background-color: #eee; font-weight: bold; width: 45px; font-size: 12px; }
         .sun-column { background-color: #fff0f0; color: red; }
         input.cell-input { width: 100%; border: none; text-align: center; font-size: 16px; outline: none; background: transparent; font-weight: bold; padding: 2px 0; }
@@ -114,7 +131,12 @@
             color: #000;
         }
 
-
+    .total-cell { 
+    background-color: #eee; 
+    font-weight: bold; 
+    width: 38px; /* Thu nhỏ từ 45px xuống 38px */
+    font-size: 11px; 
+}
 
         
     </style>

@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CHẤM CÔNG</title>
- <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <title>QUẢN LÝ CÔNG HVS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/tuannhieu/vietnamese-lunar-calendar/lunar.min.js"></script>
-   
     
     <style>
         :root { --green-bg: #c6e0b4; --yellow-bg: #ffe699; --orange-bg: #f8cbad; --border-color: #444; }
@@ -14,7 +13,6 @@
         .container { max-width: 100%; margin: auto; background: white; padding: 12px; border-radius: 8px; }
         .setup-section { background: #f8f9fa; padding: 8px; border-radius: 6px; margin-bottom: 12px; display: flex; gap: 10px; border: 1px solid #ddd; }
         select, input { padding: 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 15px; }
-        
         .table-responsive { width: 100%; overflow-x: auto; margin-bottom: 15px; border: 1px solid var(--border-color); }
         table { width: 100%; min-width: 340px; border-collapse: collapse; table-layout: fixed; }
         th, td { border: 1px solid var(--border-color); text-align: center; padding: 4px 1px; }
@@ -23,139 +21,33 @@
         .total-cell { background-color: #eee; font-weight: bold; width: 45px; font-size: 12px; }
         .sun-column { background-color: #fff0f0; color: red; }
         input.cell-input { width: 100%; border: none; text-align: center; font-size: 16px; outline: none; background: transparent; font-weight: bold; padding: 2px 0; }
-
         .summary-wrapper { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; border-top: 2px solid #eee; padding-top: 15px; }
-        
         .salary-table { width: 100%; border: 1px solid var(--border-color); border-collapse: collapse; }
         .salary-table td { padding: 8px; border: 1px solid #ddd; font-size: 15px; }
-        
-        /* Ô NHẬP LIỆU: Xanh đậm */
-        .salary-table input { 
-            border: none; text-align: right; font-weight: bold; 
-            font-size: 15px; background: #fffdf0; width: 100%; 
-            padding: 4px; box-sizing: border-box; color: #00008B; 
-        }
-        
-        /* Ô TỰ ĐỘNG: Đen */
+        .salary-table input { border: none; text-align: right; font-weight: bold; font-size: 15px; background: #fffdf0; width: 100%; padding: 4px; box-sizing: border-box; color: #00008B; }
         .auto-calc { font-weight: bold; text-align: right; color: #000000; padding-right: 5px; }
-        
-      .button-group {
-    display: flex;
-    gap: 8px; /* Khoảng cách giữa các nút */
-    margin-bottom: 15px;
-    width: 100%;
-}
-
-/* Nút LƯU: Kéo giãn tối đa */
-.btn-save {
-    flex: 5; 
-    background-color: #28a745;
-    color: white;
-    padding: 12px 5px;
-    border: none;
-    border-radius: 6px;
-    font-weight: bold;
-    font-size: 14px;
-    cursor: pointer;
-    white-space: nowrap; /* Không cho chữ xuống dòng */
-}
-
-/* Nút XUẤT ẢNH: Chiều rộng vừa phải */
-.btn-export {
-    flex: 2.5;
-    background-color: #007bff;
-    color: white;
-    padding: 12px 5px;
-    border: none;
-    border-radius: 6px;
-    font-weight: bold;
-    font-size: 13px;
-    cursor: pointer;
-}
-
-/* Nút RESET: Nhỏ nhất */
-.btn-reset {
-    flex: 1.5;
-    background-color: #6c757d;
-    color: white;
-    padding: 12px 5px;
-    border: none;
-    border-radius: 6px;
-    font-weight: bold;
-    font-size: 13px;
-    cursor: pointer;
-}
-
-/* Hiệu ứng khi nhấn (tùy chọn thêm cho chuyên nghiệp) */
-.button-group button:active {
-    opacity: 0.8;
-    transform: scale(0.98);
-}
-        
+        .button-group { display: flex; gap: 8px; margin-bottom: 15px; width: 100%; }
+        .btn-save { flex: 5; background-color: #28a745; color: white; padding: 12px 5px; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; }
+        .btn-export { flex: 2.5; background-color: #007bff; color: white; padding: 12px 5px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; }
+        .btn-reset { flex: 1.5; background-color: #6c757d; color: white; padding: 12px 5px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; }
         .final-row { background-color: var(--yellow-bg); font-weight: bold; }
-
-
-/* Hiệu ứng khi nhấn vào ô nhập liệu ở bảng chấm công */
-.cell-input:focus {
-    background-color: #fffbdf !important; /* Đổi màu nền nhẹ */
-    outline: 2px solid #28a745 !important; /* Đường viền xanh sáng */
-    border-radius: 2px;
-    z-index: 10; /* Đảm bảo viền không bị che bởi ô khác */
-    position: relative;
-}
-
-/* Hiệu ứng cho các ô nhập lương (LCB, Phụ cấp...) */
-.salary-table input:focus {
-    outline: 2px solid #007bff !important; /* Đường viền xanh dương */
-    background-color: #ffffff !important;
-    box-shadow: 0 0 5px rgba(0,123,255,0.5); /* Đổ bóng nhẹ */
-}
-
-#user-name:focus {
-    outline: 2px solid #d9534f;
-    background-color: #fff;
-    box-shadow: 0 0 5px rgba(217, 83, 79, 0.5);
-}
-
-.footer {
-    margin-top: 30px;
-    padding: 20px 0;
-    text-align: center;
-    border-top: 1px solid #eee;
-    color: #888;
-    line-height: 1.6;
-}
-
-.dev-name {
-    font-size: 11px;
-    letter-spacing: 1px;
-    font-weight: 600;
-    margin: 0;
-}
-
-.dev-dept {
-    font-size: 10px;
-    font-style: italic;
-    margin: 2px 0 0 0;
-}
-        
-        
+        .footer { margin-top: 30px; padding: 20px 0; text-align: center; border-top: 1px solid #eee; color: #888; }
+        .lunar-text { font-size: 10px; margin-top: -2px; display: block; }
     </style>
 </head>
 <body>
 
 <div class="container">
-   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-    <div style="width: 30px;"></div> <h2 style="margin: 0; font-size: 1.1rem;">QUẢN LÝ CÔNG HVS</h2>
-    <button onclick="shareWeb()" style="background: none; border: none; cursor: pointer; padding: 5px;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#007bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
-    </button>
-</div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <div style="width: 30px;"></div> <h2 style="margin: 0; font-size: 1.1rem;">QUẢN LÝ CÔNG HVS</h2>
+        <button onclick="shareWeb()" style="background: none; border: none; cursor: pointer; padding: 5px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#007bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+        </button>
+    </div>
 
-<div style="text-align: center; margin-bottom: 15px;">
-    <input type="text" id="user-name" placeholder="Nhập họ tên của bạn..." 
-           style="width: 80%; padding: 8px; border: 1px solid #ccc; border-radius: 20px; text-align: center; font-weight: bold; color: #d9534f;">
-</div>
+    <div style="text-align: center; margin-bottom: 15px;">
+        <input type="text" id="user-name" placeholder="Nhập họ tên của bạn..." style="width: 80%; padding: 8px; border: 1px solid #ccc; border-radius: 20px; text-align: center; font-weight: bold; color: #d9534f;">
+    </div>
     
     <div class="setup-section">
         <select id="month-select" onchange="renderCalendar()" style="flex:2"></select>
@@ -165,16 +57,11 @@
     <div id="calendar-content"></div>
 
     <div class="summary-wrapper">
-       <div class="button-group">
-   
-           
-    <div class="button-group">
-    <button class="btn-save" onclick="saveData()">LƯU DỮ LIỆU</button>
-    <button class="btn-export" onclick="exportImage()" style="background:#007bff; color:white; border:none; border-radius:6px; flex:2; font-weight:bold; cursor:pointer;">XUẤT ẢNH</button>
-    <button class="btn-reset" onclick="resetData()">RESET</button>
-</div>       
-  
-</div>
+        <div class="button-group">
+            <button class="btn-save" onclick="saveData()">LƯU DỮ LIỆU</button>
+            <button class="btn-export" onclick="exportImage()">XUẤT ẢNH</button>
+            <button class="btn-reset" onclick="resetData()">RESET</button>
+        </div>
         
         <table style="width: 100%; margin-bottom: 5px; border: 1px solid #444;">
             <tr><td class="label-cell" style="background:var(--green-bg)">Tổng Thường</td><td id="res-thuong" style="font-weight:bold; text-align:right; padding-right:10px">0</td></tr>
@@ -189,11 +76,9 @@
             <tr><td class="label-cell">PC Chức vụ</td><td><input type="text" id="in-pc-chucvu" value="" oninput="formatInput(this); calculate()"></td></tr>
             <tr><td class="label-cell">PC C.Việc</td><td><input type="text" id="in-pc-congviec" value="" oninput="formatInput(this); calculate()"></td></tr>
             <tr><td class="label-cell">PC Thâm niên</td><td><input type="text" id="in-pc-thamnien" value="" oninput="formatInput(this); calculate()"></td></tr>
-            
             <tr style="color: #666;"><td class="label-cell">BHXH (8%)</td><td id="lbl-bhxh" class="auto-calc">0</td></tr>
             <tr style="color: #666;"><td class="label-cell">BHYT (1.5%)</td><td id="lbl-bhyt" class="auto-calc">0</td></tr>
             <tr style="color: #666;"><td class="label-cell">BHTN (1%)</td><td id="lbl-bhtn" class="auto-calc">0</td></tr>
-            
             <tr class="final-row">
                 <td class="label-cell">THỰC NHẬN</td>
                 <td id="lbl-total" class="auto-calc" style="color: #d9534f; font-size: 1.1em;">0</td>
@@ -203,31 +88,16 @@
 </div>
 
 <div class="footer">
-        <p class="dev-name">Developed by Nguyen Thanh Nhan</p>
-        <p class="dev-dept">E/R Outfitting 1</p>
-        <p class="dev-dept">@ 2026</p>
-    </div>
+    <p style="font-size: 11px; font-weight: 600; margin: 0;">Developed by Nguyen Thanh Nhan</p>
+    <p style="font-size: 10px; font-style: italic; margin: 2px 0 0 0;">E/R Outfitting 1 @ 2026</p>
 </div>
 
-
-
-
-    
 <script>
     const daysOfWeek = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
-    function formatNumber(n) {
-        return n.toString().replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-
-    function parseNumber(s) {
-        return parseFloat(s.toString().replace(/,/g, "")) || 0;
-    }
-
-    function formatInput(el) {
-        let val = el.value.replace(/,/g, "");
-        if (!isNaN(val) && val !== "") { el.value = formatNumber(val); }
-    }
+    function formatNumber(n) { return n.toString().replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+    function parseNumber(s) { return parseFloat(s.toString().replace(/,/g, "")) || 0; }
+    function formatInput(el) { let val = el.value.replace(/,/g, ""); if (!isNaN(val) && val !== "") { el.value = formatNumber(val); } }
 
     function init() {
         const monthSel = document.getElementById('month-select');
@@ -237,86 +107,62 @@
             monthSel.add(opt);
         }
         monthSel.value = new Date().getMonth();
+        checkUserName();
         renderCalendar();
     }
 
-// Thuật toán chuyển đổi Dương sang Âm (Rút gọn cho giai đoạn 2024-2030)
-function getLunarDay(day, month, year) {
-    // Đây là bảng tra cứu nhanh cho các năm gần đây để đảm bảo độ chính xác và nhẹ web
-    // Trong thực tế, có thể dùng thư viện lunar.js nếu muốn chính xác 100% mọi năm
-    // Ở đây ta dùng cách tính tương đối hoặc gọi API, nhưng để offline tốt nhất ta chèn logic cơ bản:
-    const lunarData = {
-        "2026-3": {1:13, 2:14, 17:29, 18:1, 31:14}, // Ví dụ dữ liệu tháng 3/2026
-    };
-    
-    // Để xử lý chính xác nhất cho Boss, tôi sử dụng cách tính logic của Hồ Ngọc Đức (rút gọn)
-    // Dưới đây là kết quả trả về giả lập hiển thị - Boss có thể thay bằng thư viện đầy đủ
-    // Nhưng để hiển thị nhanh, ta sẽ dùng công thức nội suy cho ngày âm.
-    
-    // Tạm thời trả về một giá trị mô phỏng để Boss thấy layout (Ví dụ: mùng 5)
-    // Boss có thể chèn file AmLich.js vào nếu cần độ chính xác tuyệt đối.
-    return Math.floor(Math.random() * 29) + 1; 
-}
-
-
-
-
-
-    
-    function renderCalendar() {
-    const month = parseInt(document.getElementById('month-select').value);
-    const year = parseInt(document.getElementById('year-select').value);
-    const container = document.getElementById('calendar-content');
-    container.innerHTML = '';
-    
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0).getDate();
-    let startPos = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
-    let dayCounter = 1;
-
-    while (dayCounter <= lastDay) {
-        let wrap = document.createElement('div');
-        wrap.className = 'table-responsive';
-        let table = document.createElement('table');
-        let hRow = `<tr class="header-green"><td class="label-cell">Thứ</td>`, 
-            dRow = `<tr class="header-green"><td class="label-cell">Ngày</td>`, 
-            tRow = `<tr><td class="label-cell">Thường</td>`, 
-            oRow = `<tr><td class="label-cell">OVT</td>`;
-
-        for (let i = 0; i < 7; i++) {
-            let isSun = (i === 6);
-            hRow += `<td class="${isSun ? 'sun-column' : ''}">${daysOfWeek[i]}</td>`;
-            
-            if ((dayCounter === 1 && i < startPos) || dayCounter > lastDay) {
-                dRow += '<td></td>'; tRow += '<td></td>'; oRow += '<td></td>';
-            } else {
-                // TÍNH TOÁN ÂM LỊCH CHUẨN
-                const solarDate = new Date(year, month, dayCounter);
-                const lunar = getLunarDate(solarDate.getDate(), solarDate.getMonth() + 1, solarDate.getFullYear());
-                
-                // Logic: Nếu là mùng 1 thì hiện "1/Tháng", còn lại hiện số ngày
-                let displayLunar = lunar.day === 1 ? `${lunar.day}/${lunar.month}` : lunar.day;
-                let lunarStyle = lunar.day === 1 ? "color: #d9534f; font-weight: bold;" : "color: #666;";
-
-                dRow += `<td class="${isSun ? 'sun-column' : ''}">
-                            <div style="font-size: 14px;">${dayCounter}</div>
-                            <div style="font-size: 10px; ${lunarStyle} margin-top: -2px;">${displayLunar}</div>
-                         </td>`;
-                
-                tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
-                oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
-                dayCounter++;
-            }
-        }
-        hRow += '<td class="total-cell">TỔNG</td></tr>'; dRow += '<td></td></tr>';
-        tRow += '<td class="total-cell w-t">0</td></tr>'; oRow += '<td class="total-cell w-o">0</td></tr>';
-        table.innerHTML = hRow + dRow + tRow + oRow;
-        wrap.appendChild(table);
-        container.appendChild(wrap);
-        startPos = 0;
+    function checkUserName() {
+        const savedName = localStorage.getItem('hvs_user_name');
+        if (savedName) document.getElementById('user-name').value = savedName;
     }
-    loadSavedData(); calculate();
-}
+
+    function renderCalendar() {
+        const month = parseInt(document.getElementById('month-select').value);
+        const year = parseInt(document.getElementById('year-select').value);
+        const container = document.getElementById('calendar-content');
+        container.innerHTML = '';
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0).getDate();
+        let startPos = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+        let dayCounter = 1;
+
+        while (dayCounter <= lastDay) {
+            let wrap = document.createElement('div');
+            wrap.className = 'table-responsive';
+            let table = document.createElement('table');
+            let hRow = `<tr class="header-green"><td class="label-cell">Thứ</td>`, dRow = `<tr class="header-green"><td class="label-cell">Ngày</td>`, 
+                tRow = `<tr><td class="label-cell">Thường</td>`, oRow = `<tr><td class="label-cell">OVT</td>`;
+            
+            for (let i = 0; i < 7; i++) {
+                let isSun = (i === 6);
+                hRow += `<td class="${isSun ? 'sun-column' : ''}">${daysOfWeek[i]}</td>`;
+                if ((dayCounter === 1 && i < startPos) || dayCounter > lastDay) {
+                    dRow += '<td></td>'; tRow += '<td></td>'; oRow += '<td></td>';
+                } else {
+                    // TÍNH LỊCH ÂM
+                    const solarDate = new Date(year, month, dayCounter);
+                    const lunar = getLunarDate(solarDate.getDate(), solarDate.getMonth() + 1, solarDate.getFullYear());
+                    let lunarDisplay = lunar.day === 1 ? `${lunar.day}/${lunar.month}` : lunar.day;
+                    let lunarStyle = lunar.day === 1 ? "color:red; font-weight:bold;" : "color:#666;";
+
+                    dRow += `<td class="${isSun ? 'sun-column' : ''}">
+                                <div style="font-size:14px; font-weight:bold">${dayCounter}</div>
+                                <span class="lunar-text" style="${lunarStyle}">${lunarDisplay}</span>
+                             </td>`;
+                    tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
+                    oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
+                    dayCounter++;
+                }
+            }
+            hRow += '<td class="total-cell">TỔNG</td></tr>'; dRow += '<td></td></tr>';
+            tRow += '<td class="total-cell w-t">0</td></tr>'; oRow += '<td class="total-cell w-o">0</td></tr>';
+            table.innerHTML = hRow + dRow + tRow + oRow;
+            wrap.appendChild(table);
+            container.appendChild(wrap);
+            startPos = 0;
+        }
+        loadSavedData(); calculate();
+    }
 
     function calculate() {
         let tNT = 0, oNT = 0, tCN = 0;
@@ -344,68 +190,42 @@ function getLunarDay(day, month, year) {
         const pccv = parseNumber(document.getElementById('in-pc-chucvu').value);
         const pccv_viec = parseNumber(document.getElementById('in-pc-congviec').value);
         const pctn = parseNumber(document.getElementById('in-pc-thamnien').value);
-
         const luongCanCuBH = lcb + pccv + pccv_viec + pctn;
 
-        // 1. Tính Lương giờ: (LCB / 192) * Tổng Thường
         const luongGioThucTe = Math.round((lcb / 192) * tNT);
         document.getElementById('lbl-luong-gio').innerText = luongGioThucTe.toLocaleString();
 
-        // 2. Tính Thêm giờ: ((Tổng thu nhập)/192) * (OVT*1.5 + CN*2)
         const donGiaGio = luongCanCuBH / 192;
         const tienThemGio = Math.round((donGiaGio * oNT * 1.5) + (donGiaGio * tCN * 2));
         document.getElementById('lbl-ovt-money').innerText = tienThemGio.toLocaleString();
         
-        // 3. Tính 3 loại Bảo hiểm
         const bhxh = Math.round(luongCanCuBH * 0.08);
         const bhyt = Math.round(luongCanCuBH * 0.015);
         const bhtn = Math.round(luongCanCuBH * 0.01);
-        const tongBH = bhxh + bhyt + bhtn;
-
         document.getElementById('lbl-bhxh').innerText = bhxh.toLocaleString();
         document.getElementById('lbl-bhyt').innerText = bhyt.toLocaleString();
         document.getElementById('lbl-bhtn').innerText = bhtn.toLocaleString();
 
-        // 4. THỰC NHẬN = (Lương giờ + Thêm giờ + 3 loại PC) - 3 loại Bảo hiểm
-        const thucNhan = (luongGioThucTe + tienThemGio + pccv + pctn + pccv_viec) - tongBH;
+        const thucNhan = (luongGioThucTe + tienThemGio + pccv + pctn + pccv_viec) - (bhxh + bhyt + bhtn);
         document.getElementById('lbl-total').innerText = thucNhan.toLocaleString() + " ₫";
     }
 
     function saveData() {
         const m = document.getElementById('month-select').value;
         const y = document.getElementById('year-select').value;
+        const name = document.getElementById('user-name').value;
+        if (!name) return alert("Vui lòng nhập tên!");
+        
         const data = { thuong: {}, ovt: {}, salary: {} };
         document.querySelectorAll('.in-t').forEach(i => { if(i.dataset.day) data.thuong[i.dataset.day] = i.value });
         document.querySelectorAll('.in-o').forEach(i => { if(i.dataset.day) data.ovt[i.dataset.day] = i.value });
-        data.salary = { 
-            lcb: document.getElementById('in-lcb').value, 
-            pccv: document.getElementById('in-pc-chucvu').value, 
-            pccviec: document.getElementById('in-pc-congviec').value, 
-            pctn: document.getElementById('in-pc-thamnien').value 
-        };
+        data.salary = { lcb: document.getElementById('in-lcb').value, pccv: document.getElementById('in-pc-chucvu').value, pccviec: document.getElementById('in-pc-congviec').value, pctn: document.getElementById('in-pc-thamnien').value };
+        
         localStorage.setItem(`hvs_data_${y}_${m}`, JSON.stringify(data));
-        alert("Đã lưu dữ liệu!");
+        localStorage.setItem('hvs_user_name', name);
+        alert("Đã lưu!");
     }
 
-function resetData() {
-    if (confirm("Bạn có chắc chắn muốn xóa toàn bộ dữ liệu của tháng này không?")) {
-        const m = document.getElementById('month-select').value;
-        const y = document.getElementById('year-select').value;
-        
-        // Xóa trong LocalStorage
-        localStorage.removeItem(`hvs_data_${y}_${m}`);
-        
-        // Xóa trắng các ô nhập liệu trên giao diện
-        document.querySelectorAll('.cell-input').forEach(i => i.value = "");
-        
-        // Tính toán lại các con số
-        calculate();
-        
-        alert("Đã xóa dữ liệu tháng này!");
-    }
-}
-
-    
     function loadSavedData() {
         const m = document.getElementById('month-select').value;
         const y = document.getElementById('year-select').value;
@@ -422,132 +242,32 @@ function resetData() {
             }
         }
     }
+
+    function resetData() {
+        if (confirm("Xóa dữ liệu tháng này?")) {
+            localStorage.removeItem(`hvs_data_${document.getElementById('year-select').value}_${document.getElementById('month-select').value}`);
+            renderCalendar();
+        }
+    }
+
+    function exportImage() {
+        const btn = document.querySelector('.btn-export');
+        btn.innerText = "ĐANG TẠO...";
+        html2canvas(document.querySelector('.container'), { scale: 2 }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `Cong_HVS_${document.getElementById('user-name').value || 'Bang-Cong'}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+            btn.innerText = "XUẤT ẢNH";
+        });
+    }
+
+    async function shareWeb() {
+        try { await navigator.share({ title: 'Quản Lý Công HVS', url: window.location.href }); } 
+        catch (err) { alert("Đã copy link!"); navigator.clipboard.writeText(window.location.href); }
+    }
+
     window.onload = init;
-
-// Thêm vào đầu phần Script hoặc trong hàm init
-function checkUserName() {
-    const savedName = localStorage.getItem('hvs_user_name');
-    const nameInput = document.getElementById('user-name');
-    
-    if (savedName) {
-        nameInput.value = savedName;
-    } else {
-        // Nếu mở lần đầu (chưa có tên trong localStorage)
-        let name = prompt("Chào mừng! Vui lòng nhập họ tên của bạn để bắt đầu:");
-        if (name && name.trim() !== "") {
-            nameInput.value = name;
-            localStorage.setItem('hvs_user_name', name);
-        }
-    }
-}
-
-// Cập nhật lại hàm init để gọi checkUserName
-function init() {
-    const monthSel = document.getElementById('month-select');
-    for(let i=0; i<12; i++) {
-        let opt = document.createElement('option');
-        opt.value = i; opt.text = "Tháng " + (i+1);
-        monthSel.add(opt);
-    }
-    monthSel.value = new Date().getMonth();
-    
-    checkUserName(); // Kiểm tra tên khi mở trang
-    renderCalendar();
-}
-
-// Cập nhật lại hàm saveData để lưu cả tên nếu người dùng có sửa
-function saveData() {
-    const m = document.getElementById('month-select').value;
-    const y = document.getElementById('year-select').value;
-    const userName = document.getElementById('user-name').value;
-    
-    if (!userName || userName.trim() === "") {
-        alert("Vui lòng nhập tên trước khi lưu!");
-        return;
-    }
-
-    const data = { thuong: {}, ovt: {}, salary: {} };
-    document.querySelectorAll('.in-t').forEach(i => { if(i.dataset.day) data.thuong[i.dataset.day] = i.value });
-    document.querySelectorAll('.in-o').forEach(i => { if(i.dataset.day) data.ovt[i.dataset.day] = i.value });
-    data.salary = { 
-        lcb: document.getElementById('in-lcb').value, 
-        pccv: document.getElementById('in-pc-chucvu').value, 
-        pccviec: document.getElementById('in-pc-congviec').value, 
-        pctn: document.getElementById('in-pc-thamnien').value 
-    };
-
-    // Lưu dữ liệu công tháng
-    localStorage.setItem(`hvs_data_${y}_${m}`, JSON.stringify(data));
-    // Lưu tên người dùng (cố định cho các lần sau)
-    localStorage.setItem('hvs_user_name', userName);
-    
-    alert("Đã lưu dữ liệu cho " + userName + "!");
-}
-
-
-function exportImage() {
-    // Hiển thị thông báo đang xử lý
-    const btn = document.querySelector('.btn-export');
-    const originalText = btn.innerText;
-    btn.innerText = "ĐANG TẠO...";
-    btn.disabled = true;
-
-    // Chọn vùng muốn chụp (toàn bộ class container)
-    const element = document.querySelector('.container');
-
-    html2canvas(element, {
-        scale: 2, // Tăng chất lượng ảnh (độ nét gấp 2)
-        useCORS: true,
-        backgroundColor: "#f0f2f5" // Màu nền bao quanh
-    }).then(canvas => {
-        // Chuyển canvas thành đường dẫn ảnh
-        const imageData = canvas.toDataURL("image/png");
-        
-        // Tạo một liên kết ảo để tải ảnh xuống
-        const link = document.createElement('a');
-        const month = document.getElementById('month-select').value;
-        const year = document.getElementById('year-select').value;
-        const name = document.getElementById('user-name').value || "Bang-Cong";
-        
-        link.download = `Cong_HVS_${name}_Thang_${Number(month)+1}_${year}.png`;
-        link.href = imageData;
-        link.click();
-
-        // Khôi phục trạng thái nút
-        btn.innerText = originalText;
-        btn.disabled = false;
-        
-        alert("Ảnh đã được tải xuống! Bạn có thể đính kèm vào Zalo để gửi.");
-    }).catch(err => {
-        console.error("Lỗi xuất ảnh:", err);
-        btn.innerText = originalText;
-        btn.disabled = false;
-    });
-}
-
-async function shareWeb() {
-    const shareData = {
-        title: 'Quản Lý Công HVS',
-        text: 'Ứng dụng chấm công và tính lương dành cho E/R Outfitting 1.',
-        url: window.location.href
-    };
-
-    try {
-        if (navigator.share) {
-            // Chia sẻ trực tiếp trên điện thoại (Zalo, FB, v.v.)
-            await navigator.share(shareData);
-        } else {
-            // Nếu trình duyệt không hỗ trợ (như trên máy tính cũ)
-            await navigator.clipboard.writeText(window.location.href);
-            alert("Đã sao chép link web! Bạn có thể dán (Ctrl+V) để gửi cho người khác.");
-        }
-    } catch (err) {
-        console.log("Lỗi chia sẻ:", err);
-    }
-}    
-
-
-    
 </script>
 </body>
 </html>

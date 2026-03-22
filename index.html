@@ -35,7 +35,22 @@
         /* Ô TỰ ĐỘNG: Đen */
         .auto-calc { font-weight: bold; text-align: right; color: #000000; padding-right: 5px; }
         
-        .btn-save { background-color: #28a745; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; width: 100%; font-size: 16px; margin-bottom: 10px; cursor: pointer; }
+       .button-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+        
+.btn-save { 
+    background-color: #28a745; color: white; padding: 12px; border: none; 
+    border-radius: 6px; font-weight: bold; flex: 3; font-size: 16px; cursor: pointer; 
+}
+.btn-reset { 
+    background-color: #6c757d; color: white; padding: 12px; border: none; 
+    border-radius: 6px; font-weight: bold; flex: 1; font-size: 14px; cursor: pointer; 
+}
+        
         .final-row { background-color: var(--yellow-bg); font-weight: bold; }
     </style>
 </head>
@@ -52,7 +67,10 @@
     <div id="calendar-content"></div>
 
     <div class="summary-wrapper">
-        <button class="btn-save" onclick="saveData()">LƯU DỮ LIỆU</button>
+       <div class="button-group">
+    <button class="btn-save" onclick="saveData()">LƯU DỮ LIỆU</button>
+    <button class="btn-reset" onclick="resetData()">RESET</button>
+</div>
         
         <table style="width: 100%; margin-bottom: 5px; border: 1px solid #444;">
             <tr><td class="label-cell" style="background:var(--green-bg)">Tổng Thường</td><td id="res-thuong" style="font-weight:bold; text-align:right; padding-right:10px">0</td></tr>
@@ -213,6 +231,25 @@
         alert("Đã lưu dữ liệu!");
     }
 
+function resetData() {
+    if (confirm("Bạn có chắc chắn muốn xóa toàn bộ dữ liệu của tháng này không?")) {
+        const m = document.getElementById('month-select').value;
+        const y = document.getElementById('year-select').value;
+        
+        // Xóa trong LocalStorage
+        localStorage.removeItem(`hvs_data_${y}_${m}`);
+        
+        // Xóa trắng các ô nhập liệu trên giao diện
+        document.querySelectorAll('.cell-input').forEach(i => i.value = "");
+        
+        // Tính toán lại các con số
+        calculate();
+        
+        alert("Đã xóa dữ liệu tháng này!");
+    }
+}
+
+    
     function loadSavedData() {
         const m = document.getElementById('month-select').value;
         const y = document.getElementById('year-select').value;

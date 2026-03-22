@@ -144,7 +144,12 @@
 <body>
 
 <div class="container">
-    <h2 style="text-align: center; margin: 0 0 10px 0; font-size: 1.1rem;">QUẢN LÝ CÔNG HVS</h2>
+   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+    <div style="width: 30px;"></div> <h2 style="margin: 0; font-size: 1.1rem;">QUẢN LÝ CÔNG HVS</h2>
+    <button onclick="shareWeb()" style="background: none; border: none; cursor: pointer; padding: 5px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#007bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+    </button>
+</div>
 
 <div style="text-align: center; margin-bottom: 15px;">
     <input type="text" id="user-name" placeholder="Nhập họ tên của bạn..." 
@@ -477,7 +482,28 @@ function exportImage() {
     });
 }
 
-    
+async function shareWeb() {
+    const shareData = {
+        title: 'Quản Lý Công HVS',
+        text: 'Ứng dụng chấm công và tính lương dành cho E/R Outfitting 1.',
+        url: window.location.href
+    };
+
+    try {
+        if (navigator.share) {
+            // Chia sẻ trực tiếp trên điện thoại (Zalo, FB, v.v.)
+            await navigator.share(shareData);
+        } else {
+            // Nếu trình duyệt không hỗ trợ (như trên máy tính cũ)
+            await navigator.clipboard.writeText(window.location.href);
+            alert("Đã sao chép link web! Bạn có thể dán (Ctrl+V) để gửi cho người khác.");
+        }
+    } catch (err) {
+        console.log("Lỗi chia sẻ:", err);
+    }
+}    
+
+
     
 </script>
 </body>

@@ -52,6 +52,27 @@
 }
         
         .final-row { background-color: var(--yellow-bg); font-weight: bold; }
+
+
+/* Hiệu ứng khi nhấn vào ô nhập liệu ở bảng chấm công */
+.cell-input:focus {
+    background-color: #fffbdf !important; /* Đổi màu nền nhẹ */
+    outline: 2px solid #28a745 !important; /* Đường viền xanh sáng */
+    border-radius: 2px;
+    z-index: 10; /* Đảm bảo viền không bị che bởi ô khác */
+    position: relative;
+}
+
+/* Hiệu ứng cho các ô nhập lương (LCB, Phụ cấp...) */
+.salary-table input:focus {
+    outline: 2px solid #007bff !important; /* Đường viền xanh dương */
+    background-color: #ffffff !important;
+    box-shadow: 0 0 5px rgba(0,123,255,0.5); /* Đổ bóng nhẹ */
+}
+
+
+
+        
     </style>
 </head>
 <body>

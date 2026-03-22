@@ -233,13 +233,25 @@
         if (savedName) document.getElementById('user-name').value = savedName;
     }
 
-    function resetData() {
-        if (confirm("Xóa dữ liệu tháng này?")) {
-            const m = document.getElementById('month-select').value, y = document.getElementById('year-select').value;
-            localStorage.removeItem(`hvs_data_${y}_${m}`);
-            renderCalendar();
-        }
+  function resetData() {
+    if (confirm("Boss có chắc chắn muốn xóa TOÀN BỘ dữ liệu (giờ công & ghi chú) của tháng này không?")) {
+        const m = document.getElementById('month-select').value;
+        const y = document.getElementById('year-select').value;
+        
+        // 1. Xóa dữ liệu trong bộ nhớ máy
+        localStorage.removeItem(`hvs_data_${y}_${m}`);
+        
+        // 2. Xóa trắng toàn bộ các ô nhập liệu trên màn hình ngay lập tức
+        document.querySelectorAll('.in-t, .in-o, .in-n').forEach(input => {
+            input.value = "";
+        });
+
+        // 3. Tính toán lại các con số (về 0)
+        calculate();
+        
+        alert("Đã xóa sạch dữ liệu tháng này cho Boss!");
     }
+}
 
     function exportImage() {
         const btn = document.querySelector('.btn-export'); btn.innerText = "ĐANG TẠO..."; btn.disabled = true;

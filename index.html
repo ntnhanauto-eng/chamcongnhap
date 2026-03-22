@@ -76,6 +76,29 @@
     box-shadow: 0 0 5px rgba(217, 83, 79, 0.5);
 }
 
+.footer {
+    margin-top: 30px;
+    padding: 20px 0;
+    text-align: center;
+    border-top: 1px solid #eee;
+    color: #888;
+    line-height: 1.6;
+}
+
+.dev-name {
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin: 0;
+}
+
+.dev-dept {
+    font-size: 10px;
+    font-style: italic;
+    margin: 2px 0 0 0;
+}
+        
         
     </style>
 </head>
@@ -128,6 +151,30 @@
     </div>
 </div>
 
+<div class="footer">
+        <p class="dev-name">Developed by Nguyen Thanh Nhan</p>
+        <p class="dev-dept">E/R Outfitting 1</p>
+    </div>
+</div> ```
+
+---
+
+### Kết quả trông sẽ như thế nào?
+* **Vị trí:** Nằm dưới cùng của bảng lương, cách ra một khoảng trắng vừa đủ.
+* **Đường kẻ:** Có một đường kẻ ngang mờ (`border-top`) để phân tách nội dung chính và phần thông tin nhà phát triển.
+* **Kiểu chữ:** Tên của bạn sẽ được viết hoa nhẹ nhàng, giãn chữ (`letter-spacing`) tạo cảm giác hiện đại như các ứng dụng chuyên nghiệp.
+* **Phòng ban:** Dòng "E/R Outfitting 1" sẽ nhỏ hơn và in nghiêng ở phía dưới.
+
+---
+
+### Mẹo nhỏ:
+Nếu bạn muốn phần Footer này luôn nằm ở đáy màn hình kể cả khi bảng công chưa có dữ liệu, hãy cho mình biết nhé. Hiện tại, nó sẽ tự động trôi theo độ dài của bảng lương, giúp giao diện trông tự nhiên nhất.
+
+**Tiếp theo bạn có muốn mình thêm tính năng "Xuất file ảnh" hoặc "In ấn" để gửi bảng lương này qua Zalo không?**
+
+
+
+    
 <script>
     const daysOfWeek = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 

@@ -20,10 +20,57 @@
         .sun-column { background-color: #fff0f0; color: red; }
         input.cell-input { width: 100%; border: none; text-align: center; font-size: 16px; outline: none; background: transparent; font-weight: bold; padding: 2px 0; }
         
-        /* Style cho hàng ghi chú */
+       /* Style cho hàng ghi chú nâng cấp */
         .note-row { background-color: #fafafa; }
-        .in-n { width: 100%; border: none; text-align: center; font-size: 11px; outline: none; background: transparent; color: #555; font-style: italic; padding: 2px 0; }
-        .in-n:focus { background-color: #e8f0fe !important; font-style: normal; color: #000; }
+        .in-n-wrapper { position: relative; width: 100%; height: 22px; }
+        
+        .in-n { 
+            width: 100%; 
+            border: 1px solid transparent; 
+            text-align: center; 
+            font-size: 11px; 
+            outline: none; 
+            background: transparent; 
+            color: #555; 
+            font-style: italic; 
+            padding: 2px 0;
+            resize: none; /* Chặn user kéo giãn thủ công */
+            overflow: hidden;
+            display: block;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 1;
+            height: 22px;
+            white-space: nowrap;
+        }
+
+        .in-n:focus { 
+            background-color: #e8f0fe !important; 
+            font-style: normal; 
+            color: #000; 
+            height: 80px !important; /* Mở rộng khi bấm vào */
+            z-index: 100;
+            border: 1px solid #007bff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            white-space: normal;
+            overflow-y: auto;
+            text-align: left;
+            padding: 5px;
+        }
+
+        /* Ký hiệu nhận biết có nhiều dòng */
+        .has-multi-line::after {
+            content: "📑";
+            position: absolute;
+            top: 1px;
+            right: 1px;
+            font-size: 8px;
+            color: #007bff;
+            z-index: 2;
+            pointer-events: none;
+        }
 
         .summary-wrapper { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; border-top: 2px solid #eee; padding-top: 15px; }
         .salary-table { width: 100%; border: 1px solid var(--border-color); border-collapse: collapse; }
@@ -175,7 +222,12 @@
                     dRow += `<td class="${isSun ? 'sun-column' : ''}"><div>${dayCounter}</div><div style="font-size:9px;color:#666">${ngayAm}</div></td>`;
                     tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                     oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
-                    nRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="text" class="in-n" data-day="${dayCounter}" placeholder="..."></td>`;
+                    
+       nRow += `<td class="${isSun ? 'sun-column' : ''}">
+            <div class="in-n-wrapper">
+                <textarea class="in-n" data-day="${dayCounter}" placeholder="..." oninput="checkLines(this)"></textarea>
+            </div>
+         </td>`;
                     dayCounter++;
                 }
             }
@@ -297,6 +349,28 @@
     }
 
     window.onload = init;
+
+function checkLines(el) {
+    // Kiểm tra nếu có ký tự xuống dòng hoặc độ dài văn bản quá dài
+    const hasNewLine = el.value.includes('\n');
+    const parent = el.parentElement;
+    if (hasNewLine) {
+        parent.classList.add('has-multi-line');
+    } else {
+        parent.classList.remove('has-multi-line');
+    }
+}
+
+// Cập nhật lại hàm loadSavedData để hiện icon ngay khi load trang
+const oldLoadSavedData = loadSavedData;
+loadSavedData = function() {
+    oldLoadSavedData();
+    document.querySelectorAll('.in-n').forEach(el => checkLines(el));
+}
+
+
+
+    
 </script>
 </body>
 </html>

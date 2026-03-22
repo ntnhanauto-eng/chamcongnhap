@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CHẤM CÔNG</title>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/tuannhieu/vietnamese-lunar-calendar/lunar.min.js"></script>
+   
     
     <style>
         :root { --green-bg: #c6e0b4; --yellow-bg: #ffe699; --orange-bg: #f8cbad; --border-color: #444; }
@@ -267,6 +268,7 @@ function getLunarDay(day, month, year) {
     const year = parseInt(document.getElementById('year-select').value);
     const container = document.getElementById('calendar-content');
     container.innerHTML = '';
+    
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0).getDate();
     let startPos = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
@@ -288,14 +290,19 @@ function getLunarDay(day, month, year) {
             if ((dayCounter === 1 && i < startPos) || dayCounter > lastDay) {
                 dRow += '<td></td>'; tRow += '<td></td>'; oRow += '<td></td>';
             } else {
-                // TÍNH NGÀY ÂM LỊCH TẠI ĐÂY
-                // Ở đây sử dụng hàm giả lập, Boss nên tích hợp thư viện Lunar để lấy số chuẩn
-                let ngayAm = (dayCounter + 12) % 30 || 30; 
+                // TÍNH TOÁN ÂM LỊCH CHUẨN
+                const solarDate = new Date(year, month, dayCounter);
+                const lunar = getLunarDate(solarDate.getDate(), solarDate.getMonth() + 1, solarDate.getFullYear());
+                
+                // Logic: Nếu là mùng 1 thì hiện "1/Tháng", còn lại hiện số ngày
+                let displayLunar = lunar.day === 1 ? `${lunar.day}/${lunar.month}` : lunar.day;
+                let lunarStyle = lunar.day === 1 ? "color: #d9534f; font-weight: bold;" : "color: #666;";
 
                 dRow += `<td class="${isSun ? 'sun-column' : ''}">
                             <div style="font-size: 14px;">${dayCounter}</div>
-                            <div style="font-size: 10.5px; color: #666; font-weight: normal; margin-top: -2px;">${ngayAm}</div>
+                            <div style="font-size: 10px; ${lunarStyle} margin-top: -2px;">${displayLunar}</div>
                          </td>`;
+                
                 tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                 oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                 dayCounter++;

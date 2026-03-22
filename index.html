@@ -137,6 +137,32 @@
     font-style: italic;
     margin: 2px 0 0 0;
 }
+
+
+/* Chế độ Tối (Dark Mode) */
+body.dark-mode { background-color: #1a1a1a; color: #eee; }
+body.dark-mode .container { background-color: #2d2d2d; color: #eee; }
+body.dark-mode .setup-section, body.dark-mode .label-cell { background: #3d3d3d; color: #fff; border-color: #555; }
+body.dark-mode table, body.dark-mode td, body.dark-mode th { border-color: #555; }
+body.dark-mode input { background: #444 !important; color: #fff !important; border-color: #666; }
+
+/* Ghi chú nhỏ dưới ô nhập */
+.note-input {
+    width: 100%; border: none; font-size: 10px; text-align: center;
+    font-style: italic; color: #888; background: transparent; outline: none;
+}
+body.dark-mode .note-input { color: #aaa; }
+
+/* Nút chuyển chế độ tối */
+.btn-dark-toggle {
+    position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px;
+    border-radius: 50%; border: none; background: #333; color: white;
+    cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.3); z-index: 100;
+}
+
+
+
+
         
         
     </style>
@@ -263,6 +289,12 @@
                     dRow += `<td class="${isSun ? 'sun-column' : ''}">${dayCounter}</td>`;
                     tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                     oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
+                    // Thêm dòng ghi chú vào bảng
+let nRow = `<tr><td class="label-cell">Ghi chú</td>`;
+// ... (trong vòng lặp for ngày)
+nRow += `<td><input type="text" class="note-input in-note" data-day="${dayCounter}" placeholder="..."></td>`;
+// ... (sau vòng lặp)
+table.innerHTML = hRow + dRow + tRow + oRow + nRow;
                     dayCounter++;
                 }
             }
@@ -335,6 +367,7 @@
         const data = { thuong: {}, ovt: {}, salary: {} };
         document.querySelectorAll('.in-t').forEach(i => { if(i.dataset.day) data.thuong[i.dataset.day] = i.value });
         document.querySelectorAll('.in-o').forEach(i => { if(i.dataset.day) data.ovt[i.dataset.day] = i.value });
+        document.querySelectorAll('.in-note').forEach(i => { if(i.dataset.day) data.note[i.dataset.day] = i.value });
         data.salary = { 
             lcb: document.getElementById('in-lcb').value, 
             pccv: document.getElementById('in-pc-chucvu').value, 
@@ -372,6 +405,7 @@ function resetData() {
             const d = JSON.parse(saved);
             document.querySelectorAll('.in-t').forEach(i => { if(d.thuong[i.dataset.day]) i.value = d.thuong[i.dataset.day] });
             document.querySelectorAll('.in-o').forEach(i => { if(d.ovt[i.dataset.day]) i.value = d.ovt[i.dataset.day] });
+            document.querySelectorAll('.in-note').forEach(i => { if(d.note && d.note[i.dataset.day]) i.value = d.note[i.dataset.day] });
             if(d.salary) {
                 document.getElementById('in-lcb').value = d.salary.lcb;
                 document.getElementById('in-pc-chucvu').value = d.salary.pccv;
@@ -507,5 +541,15 @@ async function shareWeb() {
 
     
 </script>
+
+<button class="btn-dark-toggle" onclick="toggleDarkMode()">🌙</button>
+
+<div class="button-group" style="margin-top:10px">
+    <button onclick="exportJSON()" style="flex:1; font-size:11px; background:#6f42c1; color:white; border:none; border-radius:4px; padding:5px;">XUẤT FILE DATA</button>
+    <button onclick="importJSON()" style="flex:1; font-size:11px; background:#e83e8c; color:white; border:none; border-radius:4px; padding:5px;">NẠP FILE DATA</button>
+</div>
+
+<input type="file" id="file-input" style="display:none" onchange="processFile(event)">
+    
 </body>
 </html>

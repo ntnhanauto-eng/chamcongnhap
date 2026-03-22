@@ -38,6 +38,41 @@
         
         .final-row { background-color: var(--yellow-bg); font-weight: bold; }
         .footer { margin-top: 30px; padding: 20px 0; text-align: center; border-top: 1px solid #eee; color: #888; font-size: 11px; }
+
+
+/* Style mới cho ô ghi chú đa dòng */
+.in-n {
+    width: 100%;
+    border: none;
+    text-align: left; /* Căn lề trái cho dễ đọc ghi chú dài */
+    font-size: 11px;
+    outline: none;
+    background: transparent;
+    color: #555;
+    font-style: italic;
+    padding: 2px 4px;
+    resize: none; /* Không cho người dùng kéo thủ công */
+    overflow: hidden;
+    display: block;
+    height: 20px; /* Chiều cao mặc định khi thu gọn */
+    transition: all 0.2s ease; /* Hiệu ứng bung ra mượt mà */
+    box-sizing: border-box;
+}
+
+/* Khi Boss bấm vào ô ghi chú */
+.in-n:focus {
+    background-color: #fff9c4 !important; /* Đổi màu nền vàng nhạt cho dễ chú ý */
+    font-style: normal;
+    color: #000;
+    height: 80px; /* Bung rộng ra để xem/nhập nhiều hàng */
+    overflow-y: auto; /* Hiện thanh cuộn nếu nội dung quá dài */
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+
+        
     </style>
 </head>
 <body>
@@ -146,7 +181,10 @@
                     dRow += `<td class="${isSun ? 'sun-column' : ''}"><div>${dayCounter}</div><div style="font-size:9px;color:#666">${ngayAm}</div></td>`;
                     tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                     oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
-                    nRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="text" class="in-n" data-day="${dayCounter}" placeholder="..."></td>`;
+                   nRow += `<td class="${isSun ? 'sun-column' : ''}">
+            <textarea class="in-n" data-day="${dayCounter}" placeholder="..." oninput="calculate()"></textarea>
+         </td>`;
+                    
                     dayCounter++;
                 }
             }
@@ -233,18 +271,19 @@
         if (savedName) document.getElementById('user-name').value = savedName;
     }
 
-  function resetData() {
-    if (confirm("Boss có chắc chắn muốn xóa TOÀN BỘ dữ liệu (giờ công & ghi chú) của tháng này không?")) {
+function resetData() {
+    if (confirm("Boss có chắc chắn muốn xóa dữ liệu tháng này?")) {
         const m = document.getElementById('month-select').value;
         const y = document.getElementById('year-select').value;
-        
-        // 1. Xóa dữ liệu trong bộ nhớ máy
         localStorage.removeItem(`hvs_data_${y}_${m}`);
         
-        // 2. Xóa trắng toàn bộ các ô nhập liệu trên màn hình ngay lập tức
-        document.querySelectorAll('.in-t, .in-o, .in-n').forEach(input => {
-            input.value = "";
+        // Xóa sạch tất cả input và textarea
+        document.querySelectorAll('.in-t, .in-o, .in-n').forEach(el => {
+            el.value = "";
         });
+        calculate();
+    }
+}
 
         // 3. Tính toán lại các con số (về 0)
         calculate();

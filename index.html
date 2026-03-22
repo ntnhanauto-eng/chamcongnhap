@@ -137,6 +137,16 @@
     font-style: italic;
     margin: 2px 0 0 0;
 }
+
+
+/* Màu sắc riêng cho hàng ghi chú */
+.note-row { background-color: #fcfcfc; }
+.in-n { 
+    width: 100%; border: none; text-align: center; 
+    font-size: 11px; outline: none; background: transparent; 
+    color: #555; font-style: italic; padding: 2px 0;
+}
+.in-n:focus { background-color: #e8f0fe !important; font-style: normal; color: #000; }
         
         
     </style>
@@ -277,31 +287,32 @@ function getLunarDay(day, month, year) {
         let hRow = `<tr class="header-green"><td class="label-cell">Thứ</td>`, 
             dRow = `<tr class="header-green"><td class="label-cell">Ngày</td>`, 
             tRow = `<tr><td class="label-cell">Thường</td>`, 
-            oRow = `<tr><td class="label-cell">OVT</td>`;
+            oRow = `<tr><td class="label-cell">OVT</td>`,
+            nRow = `<tr class="note-row"><td class="label-cell" style="font-weight:normal; color:#888">Ghi chú</td>`; // Hàng ghi chú mới
 
         for (let i = 0; i < 7; i++) {
             let isSun = (i === 6);
             hRow += `<td class="${isSun ? 'sun-column' : ''}">${daysOfWeek[i]}</td>`;
             
             if ((dayCounter === 1 && i < startPos) || dayCounter > lastDay) {
-                dRow += '<td></td>'; tRow += '<td></td>'; oRow += '<td></td>';
+                dRow += '<td></td>'; tRow += '<td></td>'; oRow += '<td></td>'; nRow += '<td></td>';
             } else {
-                // TÍNH NGÀY ÂM LỊCH TẠI ĐÂY
-                // Ở đây sử dụng hàm giả lập, Boss nên tích hợp thư viện Lunar để lấy số chuẩn
                 let ngayAm = (dayCounter + 12) % 30 || 30; 
-
                 dRow += `<td class="${isSun ? 'sun-column' : ''}">
                             <div style="font-size: 14px;">${dayCounter}</div>
                             <div style="font-size: 10.5px; color: #666; font-weight: normal; margin-top: -2px;">${ngayAm}</div>
                          </td>`;
                 tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                 oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
+                nRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="text" class="in-n" data-day="${dayCounter}" placeholder="..."></td>`;
                 dayCounter++;
             }
         }
         hRow += '<td class="total-cell">TỔNG</td></tr>'; dRow += '<td></td></tr>';
         tRow += '<td class="total-cell w-t">0</td></tr>'; oRow += '<td class="total-cell w-o">0</td></tr>';
-        table.innerHTML = hRow + dRow + tRow + oRow;
+        nRow += '<td></td></tr>'; // Cột tổng của ghi chú để trống
+        
+        table.innerHTML = hRow + dRow + tRow + oRow + nRow;
         wrap.appendChild(table);
         container.appendChild(wrap);
         startPos = 0;
@@ -362,21 +373,32 @@ function getLunarDay(day, month, year) {
         document.getElementById('lbl-total').innerText = thucNhan.toLocaleString() + " ₫";
     }
 
-    function saveData() {
-        const m = document.getElementById('month-select').value;
-        const y = document.getElementById('year-select').value;
-        const data = { thuong: {}, ovt: {}, salary: {} };
-        document.querySelectorAll('.in-t').forEach(i => { if(i.dataset.day) data.thuong[i.dataset.day] = i.value });
-        document.querySelectorAll('.in-o').forEach(i => { if(i.dataset.day) data.ovt[i.dataset.day] = i.value });
-        data.salary = { 
-            lcb: document.getElementById('in-lcb').value, 
-            pccv: document.getElementById('in-pc-chucvu').value, 
-            pccviec: document.getElementById('in-pc-congviec').value, 
-            pctn: document.getElementById('in-pc-thamnien').value 
-        };
-        localStorage.setItem(`hvs_data_${y}_${m}`, JSON.stringify(data));
-        alert("Đã lưu dữ liệu!");
+   function saveData() {
+    const m = document.getElementById('month-select').value;
+    const y = document.getElementById('year-select').value;
+    const userName = document.getElementById('user-name').value;
+    
+    if (!userName || userName.trim() === "") {
+        alert("Vui lòng nhập tên trước khi lưu!");
+        return;
     }
+
+    const data = { thuong: {}, ovt: {}, note: {}, salary: {} }; // Thêm note ở đây
+    document.querySelectorAll('.in-t').forEach(i => { if(i.dataset.day) data.thuong[i.dataset.day] = i.value });
+    document.querySelectorAll('.in-o').forEach(i => { if(i.dataset.day) data.ovt[i.dataset.day] = i.value });
+    document.querySelectorAll('.in-n').forEach(i => { if(i.dataset.day) data.note[i.dataset.day] = i.value }); // Lưu ghi chú
+    
+    data.salary = { 
+        lcb: document.getElementById('in-lcb').value, 
+        pccv: document.getElementById('in-pc-chucvu').value, 
+        pccviec: document.getElementById('in-pc-congviec').value, 
+        pctn: document.getElementById('in-pc-thamnien').value 
+    };
+
+    localStorage.setItem(`hvs_data_${y}_${m}`, JSON.stringify(data));
+    localStorage.setItem('hvs_user_name', userName);
+    alert("Đã lưu dữ liệu cho " + userName + "!");
+}
 
 function resetData() {
     if (confirm("Bạn có chắc chắn muốn xóa toàn bộ dữ liệu của tháng này không?")) {
@@ -397,22 +419,24 @@ function resetData() {
 }
 
     
-    function loadSavedData() {
-        const m = document.getElementById('month-select').value;
-        const y = document.getElementById('year-select').value;
-        const saved = localStorage.getItem(`hvs_data_${y}_${m}`);
-        if (saved) {
-            const d = JSON.parse(saved);
-            document.querySelectorAll('.in-t').forEach(i => { if(d.thuong[i.dataset.day]) i.value = d.thuong[i.dataset.day] });
-            document.querySelectorAll('.in-o').forEach(i => { if(d.ovt[i.dataset.day]) i.value = d.ovt[i.dataset.day] });
-            if(d.salary) {
-                document.getElementById('in-lcb').value = d.salary.lcb;
-                document.getElementById('in-pc-chucvu').value = d.salary.pccv;
-                document.getElementById('in-pc-congviec').value = d.salary.pccviec;
-                document.getElementById('in-pc-thamnien').value = d.salary.pctn;
-            }
+  function loadSavedData() {
+    const m = document.getElementById('month-select').value;
+    const y = document.getElementById('year-select').value;
+    const saved = localStorage.getItem(`hvs_data_${y}_${m}`);
+    if (saved) {
+        const d = JSON.parse(saved);
+        document.querySelectorAll('.in-t').forEach(i => { if(d.thuong && d.thuong[i.dataset.day]) i.value = d.thuong[i.dataset.day] });
+        document.querySelectorAll('.in-o').forEach(i => { if(d.ovt && d.ovt[i.dataset.day]) i.value = d.ovt[i.dataset.day] });
+        document.querySelectorAll('.in-n').forEach(i => { if(d.note && d.note[i.dataset.day]) i.value = d.note[i.dataset.day] }); // Load ghi chú
+        
+        if(d.salary) {
+            document.getElementById('in-lcb').value = d.salary.lcb || "";
+            document.getElementById('in-pc-chucvu').value = d.salary.pccv || "";
+            document.getElementById('in-pc-congviec').value = d.salary.pccviec || "";
+            document.getElementById('in-pc-thamnien').value = d.salary.pctn || "";
         }
     }
+}
     window.onload = init;
 
 // Thêm vào đầu phần Script hoặc trong hàm init

@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CHẤM CÔNG</title>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/vinhlh/vietnam-lunar-calendar/dist/lunar-calendar.min.js"></script>
     
     <style>
         :root { --green-bg: #c6e0b4; --yellow-bg: #ffe699; --orange-bg: #f8cbad; --border-color: #444; }
@@ -137,6 +138,22 @@
     font-style: italic;
     margin: 2px 0 0 0;
 }
+
+
+.lunar-day {
+    display: block;
+    font-size: 9px; /* Khoảng 3/4 so với ngày dương 12px */
+    color: #666;
+    font-weight: normal;
+    margin-top: -2px;
+}
+body.dark-mode .lunar-day {
+    color: #aaa;
+}
+.sun-column .lunar-day {
+    color: #ff8a8a; /* Ngày âm lịch ở cột Chủ Nhật cũng hiện màu đỏ nhạt */
+}
+
         
         
     </style>
@@ -260,7 +277,15 @@
                 if ((dayCounter === 1 && i < startPos) || dayCounter > lastDay) {
                     dRow += '<td></td>'; tRow += '<td></td>'; oRow += '<td></td>';
                 } else {
-                    dRow += `<td class="${isSun ? 'sun-column' : ''}">${dayCounter}</td>`;
+                   const lunar = getLunarDate(dayCounter, month + 1, year);
+let lunarText = lunar.day === 1 ? `${lunar.day}/${lunar.month}` : lunar.day; // Hiện cả tháng nếu là mùng 1 âm
+
+dRow += `<td class="${isSun ? 'sun-column' : ''}">
+            <div style="line-height: 1.1;">
+                ${dayCounter}
+                <span class="lunar-day">${lunarText}</span>
+            </div>
+         </td>`;
                     tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                     oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                     dayCounter++;
@@ -505,6 +530,15 @@ async function shareWeb() {
 }    
 
 
+function getLunarDate(d, m, y) {
+    // Sử dụng thư viện LunarCalendar đã nhúng ở Bước 1
+    const lunar = LunarCalendar.solarToLunar(y, m, d);
+    return {
+        day: lunar.lunarDay,
+        month: lunar.lunarMonth
+    };
+}
+    
     
 </script>
 </body>

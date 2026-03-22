@@ -539,6 +539,59 @@ async function shareWeb() {
 }    
 
 
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    localStorage.setItem('hvs_dark_mode', isDark);
+}
+
+// Thêm vào trong hàm init()
+if (localStorage.getItem('hvs_dark_mode') === 'true') {
+    document.body.classList.add('dark-mode');
+}
+
+// Xuất toàn bộ dữ liệu ra file .json
+function exportJSON() {
+    const allData = {};
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('hvs_')) {
+            allData[key] = localStorage.getItem(key);
+        }
+    }
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "backup_cong_hvs.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+}
+
+// Mở trình chọn file
+function importJSON() {
+    document.getElementById('file-input').click();
+}
+
+// Xử lý nạp file
+function processFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            Object.keys(data).forEach(key => {
+                localStorage.setItem(key, data[key]);
+            });
+            alert("Nạp dữ liệu thành công! Trang sẽ tải lại.");
+            location.reload();
+        } catch (err) {
+            alert("File không đúng định dạng!");
+        }
+    };
+    reader.readAsText(file);
+}    
     
 </script>
 

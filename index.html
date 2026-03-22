@@ -1,27 +1,166 @@
-<style>
-    /* Tôi chỉ thêm style cho các dòng bảo hiểm để nhìn chuyên nghiệp hơn */
-    .insurance-row { color: #666; font-size: 14px; }
-</style>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CHẤM CÔNG HVS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root { --green-bg: #c6e0b4; --yellow-bg: #ffe699; --orange-bg: #f8cbad; --border-color: #444; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 8px; background-color: #f0f2f5; font-size: 13px; }
+        .container { max-width: 100%; margin: auto; background: white; padding: 12px; border-radius: 8px; }
+        .setup-section { background: #f8f9fa; padding: 8px; border-radius: 6px; margin-bottom: 12px; display: flex; gap: 10px; border: 1px solid #ddd; }
+        select, input { padding: 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 15px; }
+        .table-responsive { width: 100%; overflow-x: auto; margin-bottom: 15px; border: 1px solid var(--border-color); }
+        table { width: 100%; min-width: 340px; border-collapse: collapse; table-layout: fixed; }
+        th, td { border: 1px solid var(--border-color); text-align: center; padding: 4px 1px; }
+        .header-green { background-color: var(--green-bg); font-weight: bold; font-size: 12px; }
+        .label-cell { text-align: left; padding-left: 5px; font-weight: bold; width: 65px; background: #fdfdfd; font-size: 12px; }
+        .total-cell { background-color: #eee; font-weight: bold; width: 45px; font-size: 12px; }
+        .sun-column { background-color: #fff0f0; color: red; }
+        input.cell-input { width: 100%; border: none; text-align: center; font-size: 16px; outline: none; background: transparent; font-weight: bold; padding: 2px 0; }
+        
+        /* Style cho hàng ghi chú */
+        .note-row { background-color: #fafafa; }
+        .in-n { width: 100%; border: none; text-align: center; font-size: 11px; outline: none; background: transparent; color: #555; font-style: italic; padding: 2px 0; }
+        .in-n:focus { background-color: #e8f0fe !important; font-style: normal; color: #000; }
 
-<table class="salary-table">
+        .summary-wrapper { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; border-top: 2px solid #eee; padding-top: 15px; }
+        .salary-table { width: 100%; border: 1px solid var(--border-color); border-collapse: collapse; }
+        .salary-table td { padding: 8px; border: 1px solid #ddd; font-size: 15px; }
+        .salary-table input { border: none; text-align: right; font-weight: bold; font-size: 15px; background: #fffdf0; width: 100%; padding: 4px; box-sizing: border-box; color: #00008B; }
+        .auto-calc { font-weight: bold; text-align: right; color: #000000; padding-right: 5px; }
+        
+        .button-group { display: flex; gap: 8px; margin-bottom: 15px; width: 100%; }
+        .btn-save { flex: 5; background-color: #28a745; color: white; padding: 12px 5px; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; }
+        .btn-export { flex: 2.5; background-color: #007bff; color: white; padding: 12px 5px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; }
+        .btn-reset { flex: 1.5; background-color: #6c757d; color: white; padding: 12px 5px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; }
+        
+        .final-row { background-color: var(--yellow-bg); font-weight: bold; }
+        .footer { margin-top: 30px; padding: 20px 0; text-align: center; border-top: 1px solid #eee; color: #888; font-size: 11px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <div style="width: 30px;"></div> 
+        <h2 style="margin: 0; font-size: 1.1rem;">QUẢN LÝ CÔNG HVS</h2>
+        <button onclick="shareWeb()" style="background: none; border: none; cursor: pointer; padding: 5px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#007bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+        </button>
+    </div>
+
+    <div style="text-align: center; margin-bottom: 15px;">
+        <input type="text" id="user-name" placeholder="Nhập họ tên của bạn..." style="width: 80%; padding: 8px; border: 1px solid #ccc; border-radius: 20px; text-align: center; font-weight: bold; color: #d9534f;">
+    </div>
+    
+    <div class="setup-section">
+        <select id="month-select" onchange="renderCalendar()" style="flex:2"></select>
+        <input type="number" id="year-select" value="2026" onchange="renderCalendar()" style="flex:1">
+    </div>
+
+    <div id="calendar-content"></div>
+
+    <div class="summary-wrapper">
+        <div class="button-group">
+            <button class="btn-save" onclick="saveData()">LƯU DỮ LIỆU</button>
+            <button class="btn-export" onclick="exportImage()">XUẤT ẢNH</button>
+            <button class="btn-reset" onclick="resetData()">RESET</button>
+        </div>
+        
+        <table style="width: 100%; margin-bottom: 5px; border: 1px solid #444;">
+            <tr><td class="label-cell" style="background:var(--green-bg)">Tổng Thường</td><td id="res-thuong" style="font-weight:bold; text-align:right; padding-right:10px">0</td></tr>
+            <tr><td class="label-cell" style="background:var(--orange-bg)">Tổng OVT</td><td id="res-ovt" style="font-weight:bold; text-align:right; padding-right:10px">0</td></tr>
+            <tr><td class="label-cell" style="background:#ffdada; color:red;">Tổng CN</td><td id="res-cn" style="font-weight:bold; text-align:right; padding-right:10px; color:red;">0</td></tr>
+        </table>
+
+        <table class="salary-table">
             <tr><td class="label-cell" style="width:120px">LCB</td><td><input type="text" id="in-lcb" value="" oninput="formatInput(this); calculate()"></td></tr>
             <tr style="background: #f9f9f9;"><td class="label-cell">Lương giờ</td><td id="lbl-luong-gio" class="auto-calc">0</td></tr>
             <tr><td class="label-cell">Thêm giờ</td><td id="lbl-ovt-money" class="auto-calc">0</td></tr>
             <tr><td class="label-cell">PC Chức vụ</td><td><input type="text" id="in-pc-chucvu" value="" oninput="formatInput(this); calculate()"></td></tr>
             <tr><td class="label-cell">PC C.Việc</td><td><input type="text" id="in-pc-congviec" value="" oninput="formatInput(this); calculate()"></td></tr>
             <tr><td class="label-cell">PC Thâm niên</td><td><input type="text" id="in-pc-thamnien" value="" oninput="formatInput(this); calculate()"></td></tr>
-            
-            <tr class="insurance-row"><td class="label-cell">BHXH (8%)</td><td id="lbl-bhxh" class="auto-calc">0</td></tr>
-            <tr class="insurance-row"><td class="label-cell">BHYT (1.5%)</td><td id="lbl-bhyt" class="auto-calc">0</td></tr>
-            <tr class="insurance-row"><td class="label-cell">BHTN (1%)</td><td id="lbl-bhtn" class="auto-calc">0</td></tr>
-            
+            <tr style="color: #666;"><td class="label-cell">BHXH (8%)</td><td id="lbl-bhxh" class="auto-calc">0</td></tr>
+            <tr style="color: #666;"><td class="label-cell">BHYT (1.5%)</td><td id="lbl-bhyt" class="auto-calc">0</td></tr>
+            <tr style="color: #666;"><td class="label-cell">BHTN (1%)</td><td id="lbl-bhtn" class="auto-calc">0</td></tr>
             <tr class="final-row">
                 <td class="label-cell">THỰC NHẬN</td>
                 <td id="lbl-total" class="auto-calc" style="color: #d9534f; font-size: 1.1em;">0</td>
             </tr>
         </table>
+    </div>
+</div>
+
+<div class="footer">
+    <p>Developed by Nguyen Thanh Nhan | E/R Outfitting 1 | @ 2026</p>
+</div>
+
 <script>
-    // Boss hãy thay thế hàm calculate() bằng hàm chuẩn xác này:
+    const daysOfWeek = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+
+    function formatNumber(n) { return n.toString().replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+    function parseNumber(s) { return parseFloat(s.toString().replace(/,/g, "")) || 0; }
+    function formatInput(el) { let val = el.value.replace(/,/g, ""); if (!isNaN(val) && val !== "") { el.value = formatNumber(val); } }
+
+    function init() {
+        const monthSel = document.getElementById('month-select');
+        for(let i=0; i<12; i++) {
+            let opt = document.createElement('option');
+            opt.value = i; opt.text = "Tháng " + (i+1);
+            monthSel.add(opt);
+        }
+        monthSel.value = new Date().getMonth();
+        checkUserName();
+        renderCalendar();
+    }
+
+    function renderCalendar() {
+        const month = parseInt(document.getElementById('month-select').value);
+        const year = parseInt(document.getElementById('year-select').value);
+        const container = document.getElementById('calendar-content');
+        container.innerHTML = '';
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0).getDate();
+        let startPos = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+        let dayCounter = 1;
+
+        while (dayCounter <= lastDay) {
+            let wrap = document.createElement('div');
+            wrap.className = 'table-responsive';
+            let table = document.createElement('table');
+            let hRow = `<tr class="header-green"><td class="label-cell">Thứ</td>`, 
+                dRow = `<tr class="header-green"><td class="label-cell">Ngày</td>`, 
+                tRow = `<tr><td class="label-cell">Thường</td>`, 
+                oRow = `<tr><td class="label-cell">OVT</td>`,
+                nRow = `<tr class="note-row"><td class="label-cell" style="font-weight:normal;color:#888">Ghi chú</td>`;
+
+            for (let i = 0; i < 7; i++) {
+                let isSun = (i === 6);
+                hRow += `<td class="${isSun ? 'sun-column' : ''}">${daysOfWeek[i]}</td>`;
+                if ((dayCounter === 1 && i < startPos) || dayCounter > lastDay) {
+                    dRow += '<td></td>'; tRow += '<td></td>'; oRow += '<td></td>'; nRow += '<td></td>';
+                } else {
+                    let ngayAm = (dayCounter + 12) % 30 || 30; 
+                    dRow += `<td class="${isSun ? 'sun-column' : ''}"><div>${dayCounter}</div><div style="font-size:9px;color:#666">${ngayAm}</div></td>`;
+                    tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
+                    oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
+                    nRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="text" class="in-n" data-day="${dayCounter}" placeholder="..."></td>`;
+                    dayCounter++;
+                }
+            }
+            hRow += '<td class="total-cell">TỔNG</td></tr>'; dRow += '<td></td></tr>';
+            tRow += '<td class="total-cell w-t">0</td></tr>'; oRow += '<td class="total-cell w-o">0</td></tr>';
+            nRow += '<td></td></tr>';
+            table.innerHTML = hRow + dRow + tRow + oRow + nRow;
+            wrap.appendChild(table);
+            container.appendChild(wrap);
+            startPos = 0;
+        }
+        loadSavedData(); calculate();
+    }
+
     function calculate() {
         let tNT = 0, oNT = 0, tCN = 0;
         document.querySelectorAll('.table-responsive').forEach(wrap => {
@@ -41,32 +180,94 @@
         document.getElementById('res-ovt').innerText = oNT;
         document.getElementById('res-cn').innerText = tCN;
 
-        // Lấy dữ liệu đầu vào
         const lcb = parseNumber(document.getElementById('in-lcb').value);
         const pccv = parseNumber(document.getElementById('in-pc-chucvu').value);
         const pccv_viec = parseNumber(document.getElementById('in-pc-congviec').value);
         const pctn = parseNumber(document.getElementById('in-pc-thamnien').value);
-        
-        // Công thức tính lương theo quy định HVS (Giả định 192h công chuẩn)
         const luongCanCuBH = lcb + pccv + pccv_viec + pctn;
         const luongGioThucTe = Math.round((lcb / 192) * tNT);
         document.getElementById('lbl-luong-gio').innerText = luongGioThucTe.toLocaleString();
-        
         const donGiaGio = luongCanCuBH / 192;
         const tienThemGio = Math.round((donGiaGio * oNT * 1.5) + (donGiaGio * tCN * 2));
         document.getElementById('lbl-ovt-money').innerText = tienThemGio.toLocaleString();
-        
-        // TÍNH TOÁN CHI TIẾT 3 LOẠI BẢO HIỂM
-        const bhxh = Math.round(luongCanCuBH * 0.08);
-        const bhyt = Math.round(luongCanCuBH * 0.015);
-        const bhtn = Math.round(luongCanCuBH * 0.01);
-        
+        const bhxh = Math.round(luongCanCuBH * 0.08), bhyt = Math.round(luongCanCuBH * 0.015), bhtn = Math.round(luongCanCuBH * 0.01);
         document.getElementById('lbl-bhxh').innerText = bhxh.toLocaleString();
         document.getElementById('lbl-bhyt').innerText = bhyt.toLocaleString();
         document.getElementById('lbl-bhtn').innerText = bhtn.toLocaleString();
-        
-        // TỔNG THỰC NHẬN
         const thucNhan = (luongGioThucTe + tienThemGio + pccv + pctn + pccv_viec) - (bhxh + bhyt + bhtn);
-        document.getElementById('lbl-total').innerText = Math.round(thucNhan).toLocaleString() + " ₫";
+        document.getElementById('lbl-total').innerText = thucNhan.toLocaleString() + " ₫";
     }
+
+    function saveData() {
+        const m = document.getElementById('month-select').value, y = document.getElementById('year-select').value, name = document.getElementById('user-name').value;
+        if (!name) { alert("Vui lòng nhập tên!"); return; }
+        const data = { thuong: {}, ovt: {}, note: {}, salary: {} };
+        document.querySelectorAll('.in-t').forEach(i => { if(i.dataset.day) data.thuong[i.dataset.day] = i.value });
+        document.querySelectorAll('.in-o').forEach(i => { if(i.dataset.day) data.ovt[i.dataset.day] = i.value });
+        document.querySelectorAll('.in-n').forEach(i => { if(i.dataset.day) data.note[i.dataset.day] = i.value });
+        data.salary = { lcb: document.getElementById('in-lcb').value, pccv: document.getElementById('in-pc-chucvu').value, pccviec: document.getElementById('in-pc-congviec').value, pctn: document.getElementById('in-pc-thamnien').value };
+        localStorage.setItem(`hvs_data_${y}_${m}`, JSON.stringify(data));
+        localStorage.setItem('hvs_user_name', name);
+        alert("Đã lưu dữ liệu Boss!");
+    }
+
+    function loadSavedData() {
+        const m = document.getElementById('month-select').value, y = document.getElementById('year-select').value;
+        const saved = localStorage.getItem(`hvs_data_${y}_${m}`);
+        if (saved) {
+            const d = JSON.parse(saved);
+            document.querySelectorAll('.in-t').forEach(i => { if(d.thuong && d.thuong[i.dataset.day]) i.value = d.thuong[i.dataset.day] });
+            document.querySelectorAll('.in-o').forEach(i => { if(d.ovt && d.ovt[i.dataset.day]) i.value = d.ovt[i.dataset.day] });
+            document.querySelectorAll('.in-n').forEach(i => { if(d.note && d.note[i.dataset.day]) i.value = d.note[i.dataset.day] });
+            if(d.salary) {
+                document.getElementById('in-lcb').value = d.salary.lcb || "";
+                document.getElementById('in-pc-chucvu').value = d.salary.pccv || "";
+                document.getElementById('in-pc-congviec').value = d.salary.pccviec || "";
+                document.getElementById('in-pc-thamnien').value = d.salary.pctn || "";
+            }
+        }
+    }
+
+    function checkUserName() {
+        const savedName = localStorage.getItem('hvs_user_name');
+        if (savedName) document.getElementById('user-name').value = savedName;
+    }
+
+  function resetData() {
+    if (confirm("Boss có chắc chắn muốn xóa TOÀN BỘ dữ liệu (giờ công & ghi chú) của tháng này không?")) {
+        const m = document.getElementById('month-select').value;
+        const y = document.getElementById('year-select').value;
+        
+        // 1. Xóa dữ liệu trong bộ nhớ máy
+        localStorage.removeItem(`hvs_data_${y}_${m}`);
+        
+        // 2. Xóa trắng toàn bộ các ô nhập liệu trên màn hình ngay lập tức
+        document.querySelectorAll('.in-t, .in-o, .in-n').forEach(input => {
+            input.value = "";
+        });
+
+        // 3. Tính toán lại các con số (về 0)
+        calculate();
+        
+        alert("Đã xóa sạch dữ liệu tháng này cho Boss!");
+    }
+}
+
+    function exportImage() {
+        const btn = document.querySelector('.btn-export'); btn.innerText = "ĐANG TẠO..."; btn.disabled = true;
+        html2canvas(document.querySelector('.container'), { scale: 2, backgroundColor: "#f0f2f5" }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `Cong_HVS_${document.getElementById('user-name').value}_T${Number(document.getElementById('month-select').value)+1}.png`;
+            link.href = canvas.toDataURL(); link.click();
+            btn.innerText = "XUẤT ẢNH"; btn.disabled = false;
+        });
+    }
+
+    async function shareWeb() {
+        try { await navigator.share({ title: 'QUẢN LÝ CÔNG HVS', url: window.location.href }); } catch (e) { alert("Đã sao chép link!"); }
+    }
+
+    window.onload = init;
 </script>
+</body>
+</html>

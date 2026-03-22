@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CHẤM CÔNG HVS</title>
+    <title>QUẢN LÝ CÔNG HVS</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root { --green-bg: #c6e0b4; --yellow-bg: #ffe699; --orange-bg: #f8cbad; --border-color: #444; }
@@ -20,10 +20,19 @@
         .sun-column { background-color: #fff0f0; color: red; }
         input.cell-input { width: 100%; border: none; text-align: center; font-size: 16px; outline: none; background: transparent; font-weight: bold; padding: 2px 0; }
         
-        /* Style cho hàng ghi chú */
+        /* Ghi chú đa dòng chuyên nghiệp */
         .note-row { background-color: #fafafa; }
-        .in-n { width: 100%; border: none; text-align: center; font-size: 11px; outline: none; background: transparent; color: #555; font-style: italic; padding: 2px 0; }
-        .in-n:focus { background-color: #e8f0fe !important; font-style: normal; color: #000; }
+        .in-n { 
+            width: 100%; border: none; text-align: left; font-size: 11px; outline: none; 
+            background: transparent; color: #555; font-style: italic; padding: 4px;
+            resize: none; overflow: hidden; display: block; height: 22px; 
+            transition: all 0.2s ease; box-sizing: border-box; font-family: inherit;
+        }
+        .in-n:focus { 
+            background-color: #fff9c4 !important; font-style: normal; color: #000; 
+            height: 80px; overflow-y: auto; position: relative; z-index: 10;
+            box-shadow: inset 0 0 4px rgba(0,0,0,0.1);
+        }
 
         .summary-wrapper { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; border-top: 2px solid #eee; padding-top: 15px; }
         .salary-table { width: 100%; border: 1px solid var(--border-color); border-collapse: collapse; }
@@ -37,42 +46,7 @@
         .btn-reset { flex: 1.5; background-color: #6c757d; color: white; padding: 12px 5px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; }
         
         .final-row { background-color: var(--yellow-bg); font-weight: bold; }
-        .footer { margin-top: 30px; padding: 20px 0; text-align: center; border-top: 1px solid #eee; color: #888; font-size: 11px; }
-
-
-/* Style mới cho ô ghi chú đa dòng */
-.in-n {
-    width: 100%;
-    border: none;
-    text-align: left; /* Căn lề trái cho dễ đọc ghi chú dài */
-    font-size: 11px;
-    outline: none;
-    background: transparent;
-    color: #555;
-    font-style: italic;
-    padding: 2px 4px;
-    resize: none; /* Không cho người dùng kéo thủ công */
-    overflow: hidden;
-    display: block;
-    height: 20px; /* Chiều cao mặc định khi thu gọn */
-    transition: all 0.2s ease; /* Hiệu ứng bung ra mượt mà */
-    box-sizing: border-box;
-}
-
-/* Khi Boss bấm vào ô ghi chú */
-.in-n:focus {
-    background-color: #fff9c4 !important; /* Đổi màu nền vàng nhạt cho dễ chú ý */
-    font-style: normal;
-    color: #000;
-    height: 80px; /* Bung rộng ra để xem/nhập nhiều hàng */
-    overflow-y: auto; /* Hiện thanh cuộn nếu nội dung quá dài */
-    position: relative;
-    z-index: 10;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-
-        
+        .footer { margin-top: 20px; padding: 15px 0; text-align: center; border-top: 1px solid #eee; color: #888; font-size: 10px; }
     </style>
 </head>
 <body>
@@ -87,7 +61,7 @@
     </div>
 
     <div style="text-align: center; margin-bottom: 15px;">
-        <input type="text" id="user-name" placeholder="Nhập họ tên của bạn..." style="width: 80%; padding: 8px; border: 1px solid #ccc; border-radius: 20px; text-align: center; font-weight: bold; color: #d9534f;">
+        <input type="text" id="user-name" placeholder="Nhập họ tên Boss..." style="width: 80%; padding: 8px; border: 1px solid #ccc; border-radius: 20px; text-align: center; font-weight: bold; color: #d9534f;">
     </div>
     
     <div class="setup-section">
@@ -117,9 +91,6 @@
             <tr><td class="label-cell">PC Chức vụ</td><td><input type="text" id="in-pc-chucvu" value="" oninput="formatInput(this); calculate()"></td></tr>
             <tr><td class="label-cell">PC C.Việc</td><td><input type="text" id="in-pc-congviec" value="" oninput="formatInput(this); calculate()"></td></tr>
             <tr><td class="label-cell">PC Thâm niên</td><td><input type="text" id="in-pc-thamnien" value="" oninput="formatInput(this); calculate()"></td></tr>
-            <tr style="color: #666;"><td class="label-cell">BHXH (8%)</td><td id="lbl-bhxh" class="auto-calc">0</td></tr>
-            <tr style="color: #666;"><td class="label-cell">BHYT (1.5%)</td><td id="lbl-bhyt" class="auto-calc">0</td></tr>
-            <tr style="color: #666;"><td class="label-cell">BHTN (1%)</td><td id="lbl-bhtn" class="auto-calc">0</td></tr>
             <tr class="final-row">
                 <td class="label-cell">THỰC NHẬN</td>
                 <td id="lbl-total" class="auto-calc" style="color: #d9534f; font-size: 1.1em;">0</td>
@@ -181,10 +152,7 @@
                     dRow += `<td class="${isSun ? 'sun-column' : ''}"><div>${dayCounter}</div><div style="font-size:9px;color:#666">${ngayAm}</div></td>`;
                     tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                     oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
-                   nRow += `<td class="${isSun ? 'sun-column' : ''}">
-            <textarea class="in-n" data-day="${dayCounter}" placeholder="..." oninput="calculate()"></textarea>
-         </td>`;
-                    
+                    nRow += `<td class="${isSun ? 'sun-column' : ''}"><textarea class="in-n" data-day="${dayCounter}" placeholder="..." onblur="this.scrollTop = 0"></textarea></td>`;
                     dayCounter++;
                 }
             }
@@ -228,12 +196,8 @@
         const donGiaGio = luongCanCuBH / 192;
         const tienThemGio = Math.round((donGiaGio * oNT * 1.5) + (donGiaGio * tCN * 2));
         document.getElementById('lbl-ovt-money').innerText = tienThemGio.toLocaleString();
-        const bhxh = Math.round(luongCanCuBH * 0.08), bhyt = Math.round(luongCanCuBH * 0.015), bhtn = Math.round(luongCanCuBH * 0.01);
-        document.getElementById('lbl-bhxh').innerText = bhxh.toLocaleString();
-        document.getElementById('lbl-bhyt').innerText = bhyt.toLocaleString();
-        document.getElementById('lbl-bhtn').innerText = bhtn.toLocaleString();
-        const thucNhan = (luongGioThucTe + tienThemGio + pccv + pctn + pccv_viec) - (bhxh + bhyt + bhtn);
-        document.getElementById('lbl-total').innerText = thucNhan.toLocaleString() + " ₫";
+        const thucNhan = (luongGioThucTe + tienThemGio + pccv + pctn + pccv_viec) * 0.895; // Ước tính sau bảo hiểm
+        document.getElementById('lbl-total').innerText = Math.round(thucNhan).toLocaleString() + " ₫";
     }
 
     function saveData() {
@@ -271,41 +235,28 @@
         if (savedName) document.getElementById('user-name').value = savedName;
     }
 
-function resetData() {
-    if (confirm("Boss có chắc chắn muốn xóa dữ liệu tháng này?")) {
-        const m = document.getElementById('month-select').value;
-        const y = document.getElementById('year-select').value;
-        localStorage.removeItem(`hvs_data_${y}_${m}`);
-        
-        // Xóa sạch tất cả input và textarea
-        document.querySelectorAll('.in-t, .in-o, .in-n').forEach(el => {
-            el.value = "";
-        });
-        calculate();
+    function resetData() {
+        if (confirm("Xóa sạch dữ liệu tháng này?")) {
+            const m = document.getElementById('month-select').value, y = document.getElementById('year-select').value;
+            localStorage.removeItem(`hvs_data_${y}_${m}`);
+            document.querySelectorAll('.in-t, .in-o, .in-n').forEach(el => el.value = "");
+            calculate();
+        }
     }
-}
-
-        // 3. Tính toán lại các con số (về 0)
-        calculate();
-        
-        alert("Đã xóa sạch dữ liệu tháng này cho Boss!");
-    }
-}
 
     function exportImage() {
-        const btn = document.querySelector('.btn-export'); btn.innerText = "ĐANG TẠO..."; btn.disabled = true;
-        html2canvas(document.querySelector('.container'), { scale: 2, backgroundColor: "#f0f2f5" }).then(canvas => {
+        const btn = document.querySelector('.btn-export'); btn.innerText = "ĐANG TẠO NÉT..."; btn.disabled = true;
+        html2canvas(document.querySelector('.container'), { scale: 3, backgroundColor: "#f0f2f5" }).then(canvas => {
             const link = document.createElement('a');
             link.download = `Cong_HVS_${document.getElementById('user-name').value}_T${Number(document.getElementById('month-select').value)+1}.png`;
-            link.href = canvas.toDataURL(); link.click();
+            link.href = canvas.toDataURL("image/png", 1.0); link.click();
             btn.innerText = "XUẤT ẢNH"; btn.disabled = false;
         });
     }
 
     async function shareWeb() {
-        try { await navigator.share({ title: 'QUẢN LÝ CÔNG HVS', url: window.location.href }); } catch (e) { alert("Đã sao chép link!"); }
+        try { await navigator.share({ title: 'QUẢN LÝ CÔNG HVS', url: window.location.href }); } catch (e) { alert("Đã copy link!"); }
     }
-
     window.onload = init;
 </script>
 </body>

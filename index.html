@@ -132,7 +132,6 @@
 </head>
 <body>
 
-    
 <div class="container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <div style="width: 30px;"></div> 
@@ -142,11 +141,6 @@
         </button>
     </div>
 
-<div id="weather-box" style="display:none; background: #e3f2fd; padding: 10px; border-radius: 5px; margin-bottom: 10px; font-size: 14px; border-left: 5px solid #2196f3;">
-    <span id="weather-info">Đang tải thời tiết Ninh Hòa...</span>
-</div>
-
-    
     <div style="text-align: center; margin-bottom: 15px;">
         <input type="text" id="user-name" placeholder="Nhập họ tên của bạn..." style="width: 80%; padding: 8px; border: 1px solid #ccc; border-radius: 20px; text-align: center; font-weight: bold; color: #d9534f;">
     </div>
@@ -750,42 +744,6 @@ function handleNoteInput(el) {
 
     checkLines(el);
 }
-
-async function getHVSWeather() {
-    // API Key này tôi đã kích hoạt sẵn cho Boss
-    const apiKey = "b1b15e88fa7972254124657c75355fe0"; 
-    const lat = 12.49; // Tọa độ khu vực đóng tàu Ninh Hòa
-    const lon = 109.13;
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=vi`;
-
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        const temp = Math.round(data.main.temp);
-        const desc = data.weather[0].description;
-        const mainWeather = data.weather[0].main;
-
-        let advice = "Chúc Boss một ngày làm việc hiệu quả!";
-        // Cảnh báo an toàn cho anh em E/R Outfitting 1
-        if (mainWeather === "Rain" || desc.includes("mưa")) {
-            advice = "⚠️ Có mưa, Boss nhắc anh em cẩn thận trơn trượt khi lên tàu nhé!";
-        } else if (temp > 34) {
-            advice = "🔥 Trời rất nóng, Boss lưu ý sức khỏe anh em làm trong hầm tàu.";
-        }
-
-        // Kích hoạt hiển thị
-        const weatherBox = document.getElementById('weather-box');
-        const weatherInfo = document.getElementById('weather-info');
-        
-        if(weatherBox && weatherInfo) {
-            weatherBox.style.display = 'block'; // Hiện hộp thông tin
-            weatherInfo.innerHTML = `📍 <b>Ninh Hòa:</b> ${temp}°C - ${desc.charAt(0).toUpperCase() + desc.slice(1)}. <br> 💡 <i>${advice}</i>`;
-        }
-    } catch (error) {
-        console.error("Không lấy được thời tiết:", error);
-    }
-}
-
     
 </script>
 </body>

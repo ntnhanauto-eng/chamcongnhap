@@ -318,9 +318,25 @@ const currentYear = today.getFullYear();
     function saveData() {
         const m = document.getElementById('month-select').value, y = document.getElementById('year-select').value, name = document.getElementById('user-name').value;
         if (!name) { alert("Vui lòng nhập tên!"); return; }
-        const data = { thuong: {}, ovt: {}, note: {}, salary: {} };
-        document.querySelectorAll('.in-t').forEach(i => { if(i.dataset.day) data.thuong[i.dataset.day] = i.value });
-        document.querySelectorAll('.in-o').forEach(i => { if(i.dataset.day) data.ovt[i.dataset.day] = i.value });
+        const data = { thuong: {}, ovt: {}, note: {}, salary: {}, dayType: {} };
+       document.querySelectorAll('.in-t').forEach(i => { 
+    if(i.dataset.day) {
+        data.thuong[i.dataset.day] = i.value;
+
+        // 🔥 Lưu loại ngày
+        data.dayType[i.dataset.day] = i.classList.contains('is-sun') ? 'sun' : 'normal';
+    }
+});
+       document.querySelectorAll('.in-o').forEach(i => { 
+    if(i.dataset.day) {
+        data.ovt[i.dataset.day] = i.value;
+
+        // 🔥 Đảm bảo không bị thiếu nếu chỉ nhập OVT
+        if (!data.dayType[i.dataset.day]) {
+            data.dayType[i.dataset.day] = i.classList.contains('is-sun') ? 'sun' : 'normal';
+        }
+    }
+});
         document.querySelectorAll('.in-n').forEach(i => { if(i.dataset.day) data.note[i.dataset.day] = i.value });
         data.salary = { lcb: document.getElementById('in-lcb').value, pccv: document.getElementById('in-pc-chucvu').value, pccviec: document.getElementById('in-pc-congviec').value, pctn: document.getElementById('in-pc-thamnien').value };
         localStorage.setItem(`hvs_data_${y}_${m}`, JSON.stringify(data));
@@ -477,21 +493,33 @@ function renderChart() {
 
             // Tính lại lương giống logic hiện tại
             let tNT = 0, oNT = 0, tCN = 0;
+if (d.thuong) {
+    for (let day in d.thuong) {
+        let val = Number(d.thuong[day]) || 0;
 
-            if (d.thuong) {
-                for (let day in d.thuong) {
-                    let val = Number(d.thuong[day]) || 0;
-                    // CN không phân biệt được trong lưu → tạm tính chung
-                    tNT += val;
-                }
-            }
+       const isSun = d.dayType 
+    ? d.dayType[day] === 'sun'
+    : false; // dữ liệu cũ coi như ngày thường {
+            tCN += val; // 🔥 Chủ nhật
+        } else {
+            tNT += val; // ngày thường
+        }
+    }
+}
 
-            if (d.ovt) {
-                for (let day in d.ovt) {
-                    let val = Number(d.ovt[day]) || 0;
-                    oNT += val;
-                }
-            }
+          if (d.ovt) {
+    for (let day in d.ovt) {
+        let val = Number(d.ovt[day]) || 0;
+
+       const isSun = d.dayType 
+    ? d.dayType[day] === 'sun'
+    : false; // dữ liệu cũ coi như ngày thường {
+            tCN += val; // 🔥 OVT CN tính x2
+        } else {
+            oNT += val;
+        }
+    }
+}
 
             const lcb = parseNumber(d.salary?.lcb || 0);
             const pccv = parseNumber(d.salary?.pccv || 0);

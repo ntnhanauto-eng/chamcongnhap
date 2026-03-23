@@ -244,6 +244,25 @@ const holidaysLunar = {
         renderCalendar();
     }
 
+// ===== CHUYỂN DƯƠNG -> ÂM (rút gọn đủ dùng) =====
+function getLunarDate(dd, mm, yy) {
+    const date = new Date(yy, mm, dd);
+
+    // GIẢ LẬP CHU KỲ ÂM (ổn định hơn code cũ)
+    const base = new Date(2024, 1, 10); // Mốc gần Tết thật
+    const diff = Math.floor((date - base) / (1000 * 60 * 60 * 24));
+
+    let lunarDay = (diff % 30 + 30) % 30 + 1;
+    let lunarMonth = (Math.floor(diff / 30) % 12 + 12) % 12 + 1;
+
+    return {
+        day: lunarDay,
+        month: lunarMonth
+    };
+}
+
+    
+
     function renderCalendar() {
         const month = parseInt(document.getElementById('month-select').value);
         const year = parseInt(document.getElementById('year-select').value);
@@ -274,29 +293,30 @@ const currentYear = today.getFullYear();
                 if ((dayCounter === 1 && i < startPos) || dayCounter > lastDay) {
                     dRow += '<td></td>'; tRow += '<td></td>'; oRow += '<td></td>'; nRow += '<td></td>';
                 } else {
-                    let ngayAm = (dayCounter + 12) % 30 || 30; 
+                    
                     let solarKey = (month + 1) + "-" + dayCounter;
-let lunarMonth = Math.ceil(((dayCounter + 12) % 360) / 30) || 12;
-let lunarDay = ngayAm;
+                   const lunar = getLunarDate(dayCounter, month, year);
 
-let lunarKey = lunarMonth + "-" + lunarDay;
+                 let lunarDay = lunar.day;
+                 let lunarMonth = lunar.month;
+
+                let lunarKey = lunarMonth + "-" + lunarDay;
 
 let holidayText = holidaysSolar[solarKey] || holidaysLunar[lunarKey] || "";
                     let isToday = (dayCounter === currentDay && month === currentMonth && year === currentYear);
                    dRow += `<td class="${isSun ? 'sun-column' : ''} ${isToday ? 'today-cell' : ''}">
             <div>${dayCounter}</div>
-            <div style="font-size:9px;color:#666">${ngayAm}</div>
+            <div style="font-size:9px;color:#666">${lunarDay}</div>
          </td>`;
                     tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                     oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                     
-      nRow += `<td class="${isSun ? 'sun-column' : ''}">
+     nRow += `<td class="${isSun ? 'sun-column' : ''}">
     <div class="in-n-wrapper">
         <textarea class="in-n ${holidayText ? 'holiday-note' : ''}" 
             data-day="${dayCounter}" 
             data-holiday="${holidayText}"
-            placeholder="${holidayText ? holidayText : '...'}"
-            oninput="handleNoteInput(this)"></textarea>
+            oninput="handleNoteInput(this)">${holidayText ? holidayText + '\n' : ''}</textarea>
     </div>
 </td>`;
                     dayCounter++;
@@ -633,10 +653,10 @@ function handleNoteInput(el) {
     const holiday = el.dataset.holiday || "";
 
     if (holiday) {
-        // Nếu user cố xóa phần lễ → khôi phục
-        if (!el.value.startsWith(holiday)) {
-            el.value = holiday + "\n";
-        }
+        // Luôn giữ dòng lễ ở đầu
+        let userText = el.value.replace(holiday, "").trimStart();
+
+        el.value = holiday + (userText ? "\n" + userText : "\n");
     }
 
     checkLines(el);

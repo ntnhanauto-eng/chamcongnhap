@@ -214,11 +214,12 @@
 
         }
 
-        /* NEW: Highlight current day */
-        .current-day {
-            background-color: #e0f2f7 !important; /* Màu xanh nhạt */
-            border: 2px solid #007bff !important; /* Viền xanh */
+        /* NEW: Highlight current day's date cell */
+        .current-day-date {
+            background-color: #a7d7f7 !important; 
+            border-radius: 50%;
             font-weight: bold;
+            color: #1a0dab !important;
         }
         
     </style>
@@ -349,13 +350,10 @@
 
         }
 
-        // Set month to current month
-        monthSel.value = new Date().getMonth();
-        // Set year to current year if not already 2026
-        const currentYear = new Date().getFullYear();
-        if (document.getElementById('year-select').value != currentYear) { // Only update if not explicitly set to 2026
-            document.getElementById('year-select').value = currentYear;
-        }
+        // Set month and year to current
+        const today = new Date();
+        monthSel.value = today.getMonth();
+        document.getElementById('year-select').value = today.getFullYear();
 
         checkUserName();
 
@@ -416,22 +414,21 @@
                     dRow += '<td></td>'; tRow += '<td></td>'; oRow += '<td></td>'; nRow += '<td></td>';
 
                 } else {
-                    // Check if this is the current day and current month/year
+                    
                     let isCurrentDay = (dayCounter === currentDay && month === currentMonth && year === currentYear);
-                    let dayCellClass = `${isSun ? 'sun-column' : ''} ${isCurrentDay ? 'current-day' : ''}`;
-
+                    let dateCellContentClass = isCurrentDay ? 'current-day-date' : '';
 
                     let ngayAm = (dayCounter + 12) % 30 || 30; 
 
-                    dRow += `<td class="${dayCellClass}"><div>${dayCounter}</div><div style="font-size:9px;color:#666">${ngayAm}</div></td>`;
+                    dRow += `<td class="${isSun ? 'sun-column' : ''}"><div class="${dateCellContentClass}">${dayCounter}</div><div style="font-size:9px;color:#666">${ngayAm}</div></td>`;
 
-                    tRow += `<td class="${dayCellClass}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
+                    tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
 
-                    oRow += `<td class="${dayCellClass}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
+                    oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
 
                     
 
-nRow += `<td class="${dayCellClass}">
+nRow += `<td class="${isSun ? 'sun-column' : ''}">
 
             <div class="in-n-wrapper">
 
@@ -667,46 +664,4 @@ nRow += `<td class="${dayCellClass}">
 
         // Nếu nội dung có dấu xuống dòng (\n) thì hiện đốm xanh
 
-        const hasNewLine = el.value.includes('\\n');
-
-        const parent = el.parentElement;
-
-        
-
-        if (hasNewLine && el.value.trim() !== "") {
-
-            parent.classList.add('has-multi-line');
-
-        } else {
-
-            parent.classList.remove('has-multi-line');
-
-        }
-
-    }
-
-    // Cập nhật lại hàm load để quét dữ liệu cũ khi vừa mở trang
-
-    const oldLoadSavedData = loadSavedData;
-
-    loadSavedData = function() {
-
-        oldLoadSavedData();
-
-        // Đợi 1 chút để dữ liệu điền vào các ô rồi mới kiểm tra dòng
-
-        setTimeout(() => {
-
-            document.querySelectorAll('.in-n').forEach(el => checkLines(el));
-
-        }, 100);
-
-    }
-
-    
-
-</script>
-
-</body>
-
-</html>
+        const hasN

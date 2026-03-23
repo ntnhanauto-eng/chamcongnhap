@@ -261,6 +261,99 @@ function getLunarDate(dd, mm, yy) {
     };
 }
 
+// ====== ÂM LỊCH CHUẨN ======
+function INT(d) { return Math.floor(d); }
+
+function jdFromDate(dd, mm, yy) {
+    let a = INT((14 - mm) / 12);
+    let y = yy + 4800 - a;
+    let m = mm + 12 * a - 3;
+    let jd = dd + INT((153 * m + 2) / 5) + 365 * y + INT(y / 4) - INT(y / 100) + INT(y / 400) - 32045;
+    if (jd < 2299161) {
+        jd = dd + INT((153 * m + 2) / 5) + 365 * y + INT(y / 4) - 32083;
+    }
+    return jd;
+}
+
+function getNewMoonDay(k, timeZone) {
+    let T = k / 1236.85;
+    let T2 = T * T;
+    let T3 = T2 * T;
+    let dr = Math.PI / 180;
+
+    let Jd1 = 2415020.75933 + 29.53058868 * k
+        + 0.0001178 * T2
+        - 0.000000155 * T3;
+
+    Jd1 += 0.00033 * Math.sin((166.56 + 132.87 * T - 0.009173 * T2) * dr);
+
+    let M = 359.2242 + 29.10535608 * k - 0.0000333 * T2;
+    let Mpr = 306.0253 + 385.81691806 * k + 0.0107306 * T2;
+    let F = 21.2964 + 390.67050646 * k - 0.0016528 * T2;
+
+    let C1 = (0.1734 - 0.000393 * T) * Math.sin(M * dr)
+        + 0.0021 * Math.sin(2 * dr * M)
+        - 0.4068 * Math.sin(Mpr * dr)
+        + 0.0161 * Math.sin(2 * dr * Mpr)
+        - 0.0004 * Math.sin(3 * dr * Mpr)
+        + 0.0104 * Math.sin(2 * dr * F)
+        - 0.0051 * Math.sin((M + Mpr) * dr)
+        - 0.0074 * Math.sin((M - Mpr) * dr)
+        + 0.0004 * Math.sin((2 * F + M) * dr)
+        - 0.0004 * Math.sin((2 * F - M) * dr);
+
+    let JdNew = Jd1 + C1;
+
+    return INT(JdNew + 0.5 + timeZone / 24);
+}
+
+function getLunarMonth11(yy, timeZone) {
+    let off = jdFromDate(31, 12, yy) - 2415021;
+    let k = INT(off / 29.530588853);
+    let nm = getNewMoonDay(k, timeZone);
+    let sunLong = getSunLongitude(nm, timeZone);
+    if (sunLong >= 9) nm = getNewMoonDay(k - 1, timeZone);
+    return nm;
+}
+
+function getSunLongitude(jdn, timeZone) {
+    let T = (jdn - 2451545.5 - timeZone / 24) / 36525;
+    let dr = Math.PI / 180;
+    let M = 357.52910 + 35999.05030 * T;
+    let L0 = 280.46645 + 36000.76983 * T;
+    let DL = (1.914600 - 0.004817 * T) * Math.sin(dr * M);
+    let L = L0 + DL;
+    L = L * dr;
+    L = L - Math.PI * 2 * INT(L / (Math.PI * 2));
+    return INT(L / Math.PI * 6);
+}
+
+function getLunarDate(dd, mm, yy) {
+    let timeZone = 7.0;
+    let dayNumber = jdFromDate(dd, mm + 1, yy);
+
+    let k = INT((dayNumber - 2415021.076998695) / 29.530588853);
+    let monthStart = getNewMoonDay(k + 1, timeZone);
+
+    if (monthStart > dayNumber) {
+        monthStart = getNewMoonDay(k, timeZone);
+    }
+
+    let lunarDay = dayNumber - monthStart + 1;
+
+    let a11 = getLunarMonth11(yy, timeZone);
+    let b11 = a11;
+
+    let lunarMonth = INT((monthStart - a11) / 29) + 11;
+
+    if (lunarMonth > 12) lunarMonth -= 12;
+
+    return {
+        day: lunarDay,
+        month: lunarMonth
+    };
+}
+
     
 
     function renderCalendar() {

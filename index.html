@@ -257,7 +257,7 @@ const currentYear = today.getFullYear();
             container.appendChild(wrap);
             startPos = 0;
         }
-        loadSavedData(); calculate();
+        loadSavedData(); calculate(); setupNoteExpand();
     }
 
     function calculate() {
@@ -391,6 +391,28 @@ loadSavedData = function() {
 }
 
 
+
+function setupNoteExpand() {
+    document.querySelectorAll('.in-n').forEach(el => {
+
+        // Khi click vào → phóng to gấp ~3 lần
+        el.addEventListener('focus', function () {
+            const normalHeight = el.dataset.normalHeight || el.offsetHeight;
+            el.dataset.normalHeight = normalHeight;
+
+            el.style.height = (normalHeight * 3) + 'px';
+        });
+
+        // Khi click ra ngoài → thu lại
+        el.addEventListener('blur', function () {
+            if (el.dataset.normalHeight) {
+                el.style.height = el.dataset.normalHeight + 'px';
+            }
+        });
+
+    });
+}
+    
     
 </script>
 </body>

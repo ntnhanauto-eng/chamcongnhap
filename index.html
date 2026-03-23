@@ -206,6 +206,7 @@
 </div>
 
 <script>
+
 // --- 1. CẤU HÌNH NGÀY LỄ ---
 const holidaysSolar = {
     "1-1": "Tết Dương lịch",
@@ -502,6 +503,207 @@ async function shareWeb() {
 }
 
 window.onload = init;
+
+function checkLines(el) {
+    // Nếu nội dung có dấu xuống dòng (\n) thì hiện đốm xanh
+    const hasNewLine = el.value.includes('\n');
+    const parent = el.parentElement;
+    
+    if (hasNewLine && el.value.trim() !== "") {
+        parent.classList.add('has-multi-line');
+    } else {
+        parent.classList.remove('has-multi-line');
+    }
+}
+
+// Cập nhật lại hàm load để quét dữ liệu cũ khi vừa mở trang
+const oldLoadSavedData = loadSavedData;
+loadSavedData = function() {
+    oldLoadSavedData();
+    // Đợi 1 chút để dữ liệu điền vào các ô rồi mới kiểm tra dòng
+    setTimeout(() => {
+        document.querySelectorAll('.in-n').forEach(el => checkLines(el));
+    }, 100);
+}
+
+
+
+function setupNoteExpand() {
+    document.querySelectorAll('.in-n').forEach(el => {
+
+        if (el.dataset.bound) return;
+        el.dataset.bound = "1";
+
+        el.addEventListener('focus', function () {
+            const rect = el.getBoundingClientRect();
+
+            // Lưu style cũ
+            el.dataset.oldStyle = el.getAttribute('style') || "";
+
+            const newWidth = rect.width * 3;
+            const newHeight = rect.height * 3;
+
+            // Giữ vị trí gần ô cũ (không nhảy giữa màn hình)
+            el.style.setProperty('position', 'fixed', 'important');
+            el.style.setProperty('top', rect.top + 'px', 'important');
+            el.style.setProperty('left', rect.left + 'px', 'important');
+
+            el.style.setProperty('width', newWidth + 'px', 'important');
+            el.style.setProperty('height', newHeight + 'px', 'important');
+
+            el.style.setProperty('z-index', '9999', 'important');
+            el.style.setProperty('background', '#fff', 'important');
+            el.style.setProperty('border', '2px solid #007bff', 'important');
+            el.style.setProperty('box-shadow', '0 8px 20px rgba(0,0,0,0.25)', 'important');
+        });
+
+        el.addEventListener('blur', function () {
+            el.setAttribute('style', el.dataset.oldStyle || "");
+        });
+
+    });
+}
+
+
+let chartInstance = null;
+
+function toggleChart() {
+    const container = document.getElementById('chart-container');
+
+    if (container.style.display === "none") {
+        container.style.display = "block";
+        renderChart();
+    } else {
+        container.style.display = "none";
+    }
+}
+
+function renderChart() {
+    const ctx = document.getElementById('salaryChart').getContext('2d');
+    const year = document.getElementById('year-select').value;
+    let labels = [];
+    let data = [];
+
+    for (let m = 0; m < 12; m++) {
+        labels.push("T" + (m + 1));
+        const saved = localStorage.getItem(`hvs_data_${year}_${m}`);
+        
+        if (saved) {
+            const d = JSON.parse(saved);
+            
+            // --- Bắt đầu logic tính lương chuẩn ---
+            const lcb = parseNumber(d.salary?.lcb || 0);
+            const pccv = parseNumber(d.salary?.pccv || 0);
+            const pccv_viec = parseNumber(d.salary?.pccviec || 0);
+            const pctn = parseNumber(d.salary?.pctn || 0);
+
+            // Cần tạo một DOM tạm để biết ngày nào là Chủ Nhật
+            const firstDayOfMonth = new Date(year, m, 1);
+            const daysInMonth = new Date(year, m + 1, 0).getDate();
+            let startDayOfWeek = firstDayOfMonth.getDay(); // 0=CN, 1=T2,...
+            if (startDayOfWeek === 0) startDayOfWeek = 7; // Chuyển CN về cuối tuần (7)
+
+            let tNT = 0, oNT = 0, tCN = 0;
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayOfWeek = (startDayOfWeek + day - 2) % 7 + 1; // 1=T2, ..., 7=CN
+                const isSun = (dayOfWeek === 7);
+
+                const thuongVal = Number(d.thuong?.[day] || 0);
+                const ovtVal = Number(d.ovt?.[day] || 0);
+
+                if (isSun) {
+                    tCN += thuongVal + ovtVal;
+                } else {
+                    tNT += thuongVal;
+                    oNT += ovtVal;
+                }
+            }
+            
+            const luongCanCuBH = lcb + pccv + pccv_viec + pctn;
+            const luongGioThucTe = Math.round((lcb / 192) * tNT);
+            const donGiaGio = luongCanCuBH > 0 ? luongCanCuBH / 192 : 0;
+            const tienThemGio = Math.round((donGiaGio * oNT * 1.5) + (donGiaGio * tCN * 2));
+
+            const bhxh = Math.round(luongCanCuBH * 0.08);
+            const bhyt = Math.round(luongCanCuBH * 0.015);
+            const bhtn = Math.round(luongCanCuBH * 0.01);
+            
+            const thucNhan = (luongGioThucTe + tienThemGio + pccv + pctn + pccv_viec) - (bhxh + bhyt + bhtn);
+            
+            data.push(thucNhan > 0 ? Math.round(thucNhan) : 0);
+            // --- Kết thúc logic tính lương chuẩn ---
+
+        } else {
+            data.push(0);
+        }
+    }
+
+    if (chartInstance) {
+        chartInstance.destroy();
+    }
+
+    chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Thu nhập (₫)',
+                data: data,
+                tension: 0.3,
+                fill: true,
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                borderColor: 'rgba(0, 123, 255, 1)',
+                pointBackgroundColor: 'rgba(0, 123, 255, 1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y.toLocaleString() + ' ₫';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    ticks: {
+                        callback: function(value) {
+                             if (value >= 1000000) return (value / 1000000).toLocaleString() + ' Tr';
+                             if (value >= 1000) return (value / 1000).toLocaleString() + ' K';
+                             return value;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function handleNoteInput(el) {
+    const holiday = el.dataset.holiday || "";
+
+    if (holiday) {
+        // Luôn giữ dòng lễ ở đầu
+        let userText = el.value.replace(holiday, "").trimStart();
+
+        el.value = holiday + (userText ? "\n" + userText : "\n");
+    }
+
+    checkLines(el);
+}
+    
 </script>
 </body>
 </html>

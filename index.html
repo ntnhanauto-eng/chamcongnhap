@@ -395,7 +395,19 @@ const currentYear = today.getFullYear();
 
                 let lunarKey = lunarMonth + "-" + lunarDay;
 
-let holidayText = holidaysSolar[solarKey] || holidaysLunar[lunarKey] || "";
+let holidayText = "";
+
+// Ưu tiên dương lịch
+if (holidaysSolar[solarKey]) {
+    holidayText = holidaysSolar[solarKey];
+} else {
+    // Kiểm tra âm lịch chuẩn hơn
+    if (lunarMonth === 1 && (lunarDay === 1 || lunarDay === 2 || lunarDay === 3)) {
+        holidayText = "Tết Nguyên Đán";
+    } else if (lunarMonth === 3 && lunarDay === 10) {
+        holidayText = "Giỗ tổ Hùng Vương";
+    }
+}
                     let isToday = (dayCounter === currentDay && month === currentMonth && year === currentYear);
                    dRow += `<td class="${isSun ? 'sun-column' : ''} ${isToday ? 'today-cell' : ''}">
             <div>${dayCounter}</div>

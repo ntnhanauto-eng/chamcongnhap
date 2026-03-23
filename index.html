@@ -401,27 +401,27 @@ function setupNoteExpand() {
         el.addEventListener('focus', function () {
             const rect = el.getBoundingClientRect();
 
-            // Lưu trạng thái cũ
+            // Lưu style cũ
             el.dataset.oldStyle = el.getAttribute('style') || "";
 
-            // Phóng to full đẹp hơn (mobile cực sướng)
-            el.style.setProperty('position', 'fixed', 'important');
-            el.style.setProperty('top', '50%', 'important');
-            el.style.setProperty('left', '50%', 'important');
-            el.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+            const newWidth = rect.width * 3;
+            const newHeight = rect.height * 3;
 
-            el.style.setProperty('width', '90vw', 'important');   // ngang lớn
-            el.style.setProperty('height', '60vh', 'important');  // cao lớn
+            // Giữ vị trí gần ô cũ (không nhảy giữa màn hình)
+            el.style.setProperty('position', 'fixed', 'important');
+            el.style.setProperty('top', rect.top + 'px', 'important');
+            el.style.setProperty('left', rect.left + 'px', 'important');
+
+            el.style.setProperty('width', newWidth + 'px', 'important');
+            el.style.setProperty('height', newHeight + 'px', 'important');
 
             el.style.setProperty('z-index', '9999', 'important');
             el.style.setProperty('background', '#fff', 'important');
-            el.style.setProperty('padding', '10px', 'important');
             el.style.setProperty('border', '2px solid #007bff', 'important');
-            el.style.setProperty('box-shadow', '0 10px 25px rgba(0,0,0,0.3)', 'important');
+            el.style.setProperty('box-shadow', '0 8px 20px rgba(0,0,0,0.25)', 'important');
         });
 
         el.addEventListener('blur', function () {
-            // Trả lại trạng thái ban đầu
             el.setAttribute('style', el.dataset.oldStyle || "");
         });
 

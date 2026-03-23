@@ -395,39 +395,34 @@ loadSavedData = function() {
 function setupNoteExpand() {
     document.querySelectorAll('.in-n').forEach(el => {
 
-        // Khi click vào → phóng to gấp ~3 lần
-        el.addEventListener('focus', function () {
-            const normalHeight = el.dataset.normalHeight || el.offsetHeight;
-            el.dataset.normalHeight = normalHeight;
-
-            el.style.height = (normalHeight * 3) + 'px';
-        });
-
-        // Khi click ra ngoài → thu lại
-        el.addEventListener('blur', function () {
-            if (el.dataset.normalHeight) {
-                el.style.height = el.dataset.normalHeight + 'px';
-            }
-        });
-
-    });
-}
-    
-function setupNoteExpand() {
-    document.querySelectorAll('.in-n').forEach(el => {
+        if (el.dataset.bound) return;
+        el.dataset.bound = "1";
 
         el.addEventListener('focus', function () {
-            const normalHeight = el.dataset.normalHeight || el.offsetHeight;
-            el.dataset.normalHeight = normalHeight;
+            const rect = el.getBoundingClientRect();
 
-            // Ghi đè CSS !important
-            el.style.setProperty('height', (normalHeight * 3) + 'px', 'important');
+            // Lưu trạng thái cũ
+            el.dataset.oldStyle = el.getAttribute('style') || "";
+
+            // Phóng to full đẹp hơn (mobile cực sướng)
+            el.style.setProperty('position', 'fixed', 'important');
+            el.style.setProperty('top', '50%', 'important');
+            el.style.setProperty('left', '50%', 'important');
+            el.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+
+            el.style.setProperty('width', '90vw', 'important');   // ngang lớn
+            el.style.setProperty('height', '60vh', 'important');  // cao lớn
+
+            el.style.setProperty('z-index', '9999', 'important');
+            el.style.setProperty('background', '#fff', 'important');
+            el.style.setProperty('padding', '10px', 'important');
+            el.style.setProperty('border', '2px solid #007bff', 'important');
+            el.style.setProperty('box-shadow', '0 10px 25px rgba(0,0,0,0.3)', 'important');
         });
 
         el.addEventListener('blur', function () {
-            if (el.dataset.normalHeight) {
-                el.style.setProperty('height', el.dataset.normalHeight + 'px', 'important');
-            }
+            // Trả lại trạng thái ban đầu
+            el.setAttribute('style', el.dataset.oldStyle || "");
         });
 
     });

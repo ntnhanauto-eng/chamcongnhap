@@ -131,7 +131,10 @@
     </style>
 </head>
 <body>
-
+<div id="weather-box" style="display:none; background: #e3f2fd; padding: 10px; border-radius: 5px; margin-bottom: 10px; font-size: 14px; border-left: 5px solid #2196f3;">
+    <span id="weather-info">Đang tải thời tiết Ninh Hòa...</span>
+</div>
+    
 <div class="container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <div style="width: 30px;"></div> 
@@ -744,6 +747,36 @@ function handleNoteInput(el) {
 
     checkLines(el);
 }
+
+async function getHVSWeather() {
+    const apiKey = "b1b15e88fa7972254124657c75355fe0"; // Đây là key mẫu, Boss nên đăng ký 1 key free để ổn định
+    const lat = 12.49; // Tọa độ Ninh Hòa
+    const lon = 109.13;
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=vi`;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        const temp = Math.round(data.main.temp);
+        const desc = data.weather[0].description;
+        const mainWeather = data.weather[0].main; // Rain, Clouds, Clear...
+
+        let advice = "Chúc Boss một ngày làm việc hiệu quả!";
+        if (mainWeather === "Rain") advice = "⚠️ Có mưa, Boss nhắc anh em cẩn thận trơn trượt/điện đài nhé!";
+        if (temp > 35) advice = "🔥 Trời nắng gắt, Boss nhắc anh em uống đủ nước và nghỉ ngơi hợp lý.";
+
+        document.getElementById('weather-box').style.display = 'block';
+        document.getElementById('weather-info').innerHTML = 
+            `📍 <b>Ninh Hòa:</b> ${temp}°C - ${desc}. <br> 💡 <i>${advice}</i>`;
+    } catch (error) {
+        console.log("Lỗi tải thời tiết");
+    }
+}
+
+// Gọi hàm này trong init() của Boss nhé:
+// getHVSWeather();
+
+
     
 </script>
 </body>

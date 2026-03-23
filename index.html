@@ -274,9 +274,7 @@ const currentYear = today.getFullYear();
                 if ((dayCounter === 1 && i < startPos) || dayCounter > lastDay) {
                     dRow += '<td></td>'; tRow += '<td></td>'; oRow += '<td></td>'; nRow += '<td></td>';
                 } else {
-                    let lunar = getLunarDate(dayCounter, month + 1, year);
-let lunarDay = lunar.d;
-let lunarMonth = lunar.m;
+                    let ngayAm = (dayCounter + 12) % 30 || 30; 
                     let solarKey = (month + 1) + "-" + dayCounter;
 let lunarMonth = Math.ceil(((dayCounter + 12) % 360) / 30) || 12;
 let lunarDay = ngayAm;
@@ -287,7 +285,7 @@ let holidayText = holidaysSolar[solarKey] || holidaysLunar[lunarKey] || "";
                     let isToday = (dayCounter === currentDay && month === currentMonth && year === currentYear);
                    dRow += `<td class="${isSun ? 'sun-column' : ''} ${isToday ? 'today-cell' : ''}">
             <div>${dayCounter}</div>
-            <div style="font-size:9px;color:#666">${lunarDay}</div>
+            <div style="font-size:9px;color:#666">${ngayAm}</div>
          </td>`;
                     tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                     oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
@@ -643,59 +641,6 @@ function handleNoteInput(el) {
 
     checkLines(el);
 }
-
-
-function getLunarDate(dd, mm, yy) {
-    const PI = Math.PI;
-
-    function INT(d) { return Math.floor(d); }
-
-    function jdFromDate(dd, mm, yy) {
-        let a = INT((14 - mm) / 12);
-        let y = yy + 4800 - a;
-        let m = mm + 12 * a - 3;
-        let jd = dd + INT((153 * m + 2) / 5) + 365 * y + INT(y / 4) - INT(y / 100) + INT(y / 400) - 32045;
-        return jd;
-    }
-
-    function getNewMoonDay(k) {
-        return INT(2415020.75933 + 29.53058868 * k);
-    }
-
-    function getSunLongitude(jdn) {
-        return INT((jdn / 365.25) % 12);
-    }
-
-    function getLunarMonth11(yy) {
-        let off = jdFromDate(31, 12, yy) - 2415021;
-        let k = INT(off / 29.530588853);
-        let nm = getNewMoonDay(k);
-        let sunLong = getSunLongitude(nm);
-        if (sunLong >= 9) nm = getNewMoonDay(k - 1);
-        return nm;
-    }
-
-    function getLeapMonthOffset(a11) {
-        return 0;
-    }
-
-    let dayNumber = jdFromDate(dd, mm, yy);
-    let k = INT((dayNumber - 2415021) / 29.530588853);
-    let monthStart = getNewMoonDay(k + 1);
-    if (monthStart > dayNumber) monthStart = getNewMoonDay(k);
-
-    let a11 = getLunarMonth11(yy);
-    let b11 = a11;
-
-    let lunarDay = dayNumber - monthStart + 1;
-    let diff = INT((monthStart - a11) / 29);
-    let lunarMonth = diff + 11;
-
-    if (lunarMonth > 12) lunarMonth -= 12;
-
-    return { d: lunarDay, m: lunarMonth };
-}
-
     
 </script>
 </body>

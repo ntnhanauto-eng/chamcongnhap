@@ -413,6 +413,25 @@ function setupNoteExpand() {
     });
 }
     
+function setupNoteExpand() {
+    document.querySelectorAll('.in-n').forEach(el => {
+
+        el.addEventListener('focus', function () {
+            const normalHeight = el.dataset.normalHeight || el.offsetHeight;
+            el.dataset.normalHeight = normalHeight;
+
+            // Ghi đè CSS !important
+            el.style.setProperty('height', (normalHeight * 3) + 'px', 'important');
+        });
+
+        el.addEventListener('blur', function () {
+            if (el.dataset.normalHeight) {
+                el.style.setProperty('height', el.dataset.normalHeight + 'px', 'important');
+            }
+        });
+
+    });
+}
     
 </script>
 </body>

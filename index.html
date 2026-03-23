@@ -116,6 +116,13 @@
 
 
 
+        .today-cell {
+    background-color: #00d4ff !important; /* xanh nổi bật */
+    color: #000;
+    font-weight: bold;
+    border: 2px solid #007bff !important;
+}
+
         
     </style>
 </head>
@@ -198,6 +205,10 @@
     function renderCalendar() {
         const month = parseInt(document.getElementById('month-select').value);
         const year = parseInt(document.getElementById('year-select').value);
+        const today = new Date();
+const currentDay = today.getDate();
+const currentMonth = today.getMonth();
+const currentYear = today.getFullYear();
         const container = document.getElementById('calendar-content');
         container.innerHTML = '';
         const firstDay = new Date(year, month, 1);
@@ -222,7 +233,11 @@
                     dRow += '<td></td>'; tRow += '<td></td>'; oRow += '<td></td>'; nRow += '<td></td>';
                 } else {
                     let ngayAm = (dayCounter + 12) % 30 || 30; 
-                    dRow += `<td class="${isSun ? 'sun-column' : ''}"><div>${dayCounter}</div><div style="font-size:9px;color:#666">${ngayAm}</div></td>`;
+                    let isToday = (dayCounter === currentDay && month === currentMonth && year === currentYear);
+                   dRow += `<td class="${isSun ? 'sun-column' : ''} ${isToday ? 'today-cell' : ''}">
+            <div>${dayCounter}</div>
+            <div style="font-size:9px;color:#666">${ngayAm}</div>
+         </td>`;
                     tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                     oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                     

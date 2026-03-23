@@ -397,11 +397,9 @@ const currentYear = today.getFullYear();
 
 let holidayText = "";
 
-// Ưu tiên dương lịch
 if (holidaysSolar[solarKey]) {
     holidayText = holidaysSolar[solarKey];
 } else {
-    // Kiểm tra âm lịch chuẩn hơn
     if (lunarMonth === 1 && (lunarDay === 1 || lunarDay === 2 || lunarDay === 3)) {
         holidayText = "Tết Nguyên Đán";
     } else if (lunarMonth === 3 && lunarDay === 10) {

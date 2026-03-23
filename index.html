@@ -462,61 +462,65 @@ function toggleChart() {
 
 function renderChart() {
     const ctx = document.getElementById('salaryChart').getContext('2d');
-
-    // Lấy dữ liệu 12 tháng
+    const year = document.getElementById('year-select').value;
     let labels = [];
     let data = [];
 
     for (let m = 0; m < 12; m++) {
         labels.push("T" + (m + 1));
-
-        const saved = localStorage.getItem(`hvs_data_${document.getElementById('year-select').value}_${m}`);
+        const saved = localStorage.getItem(`hvs_data_${year}_${m}`);
         
         if (saved) {
             const d = JSON.parse(saved);
-
-            // Tính lại lương giống logic hiện tại
-            let tNT = 0, oNT = 0, tCN = 0;
-
-            if (d.thuong) {
-                for (let day in d.thuong) {
-                    let val = Number(d.thuong[day]) || 0;
-                    // CN không phân biệt được trong lưu → tạm tính chung
-                    tNT += val;
-                }
-            }
-
-            if (d.ovt) {
-                for (let day in d.ovt) {
-                    let val = Number(d.ovt[day]) || 0;
-                    oNT += val;
-                }
-            }
-
+            
+            // --- Bắt đầu logic tính lương chuẩn ---
             const lcb = parseNumber(d.salary?.lcb || 0);
             const pccv = parseNumber(d.salary?.pccv || 0);
             const pccv_viec = parseNumber(d.salary?.pccviec || 0);
             const pctn = parseNumber(d.salary?.pctn || 0);
 
+            // Cần tạo một DOM tạm để biết ngày nào là Chủ Nhật
+            const firstDayOfMonth = new Date(year, m, 1);
+            const daysInMonth = new Date(year, m + 1, 0).getDate();
+            let startDayOfWeek = firstDayOfMonth.getDay(); // 0=CN, 1=T2,...
+            if (startDayOfWeek === 0) startDayOfWeek = 7; // Chuyển CN về cuối tuần (7)
+
+            let tNT = 0, oNT = 0, tCN = 0;
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayOfWeek = (startDayOfWeek + day - 2) % 7 + 1; // 1=T2, ..., 7=CN
+                const isSun = (dayOfWeek === 7);
+
+                const thuongVal = Number(d.thuong?.[day] || 0);
+                const ovtVal = Number(d.ovt?.[day] || 0);
+
+                if (isSun) {
+                    tCN += thuongVal + ovtVal;
+                } else {
+                    tNT += thuongVal;
+                    oNT += ovtVal;
+                }
+            }
+            
             const luongCanCuBH = lcb + pccv + pccv_viec + pctn;
-            const luongGio = (lcb / 192) * tNT;
-            const donGia = luongCanCuBH / 192;
+            const luongGioThucTe = Math.round((lcb / 192) * tNT);
+            const donGiaGio = luongCanCuBH > 0 ? luongCanCuBH / 192 : 0;
+            const tienThemGio = Math.round((donGiaGio * oNT * 1.5) + (donGiaGio * tCN * 2));
 
-            const ovtMoney = (donGia * oNT * 1.5) + (donGia * tCN * 2);
+            const bhxh = Math.round(luongCanCuBH * 0.08);
+            const bhyt = Math.round(luongCanCuBH * 0.015);
+            const bhtn = Math.round(luongCanCuBH * 0.01);
+            
+            const thucNhan = (luongGioThucTe + tienThemGio + pccv + pctn + pccv_viec) - (bhxh + bhyt + bhtn);
+            
+            data.push(thucNhan > 0 ? Math.round(thucNhan) : 0);
+            // --- Kết thúc logic tính lương chuẩn ---
 
-            const bhxh = luongCanCuBH * 0.08;
-            const bhyt = luongCanCuBH * 0.015;
-            const bhtn = luongCanCuBH * 0.01;
-
-            const total = (luongGio + ovtMoney + pccv + pctn + pccv_viec) - (bhxh + bhyt + bhtn);
-
-            data.push(Math.round(total));
         } else {
             data.push(0);
         }
     }
 
-    // Nếu đã có chart → destroy để tránh chồng
     if (chartInstance) {
         chartInstance.destroy();
     }
@@ -529,19 +533,38 @@ function renderChart() {
                 label: 'Thu nhập (₫)',
                 data: data,
                 tension: 0.3,
-                fill: true
+                fill: true,
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                borderColor: 'rgba(0, 123, 255, 1)',
+                pointBackgroundColor: 'rgba(0, 123, 255, 1)'
             }]
         },
         options: {
             responsive: true,
             plugins: {
-                legend: { display: true }
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y.toLocaleString() + ' ₫';
+                            }
+                            return label;
+                        }
+                    }
+                }
             },
             scales: {
                 y: {
                     ticks: {
                         callback: function(value) {
-                            return value.toLocaleString() + " ₫";
+                             if (value >= 1000000) return (value / 1000000).toLocaleString() + ' Tr';
+                             if (value >= 1000) return (value / 1000).toLocaleString() + ' K';
+                             return value;
                         }
                     }
                 }
@@ -549,6 +572,7 @@ function renderChart() {
         }
     });
 }
+
 
     
 </script>

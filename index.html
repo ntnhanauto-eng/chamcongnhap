@@ -123,6 +123,10 @@
     border: 2px solid #007bff !important;
 }
 
+.holiday-note {
+    border: 1.5px solid #ff9800 !important;
+    background-color: #fff7ed;
+}
         
     </style>
 </head>
@@ -202,6 +206,26 @@
 </div>
 
 <script>
+
+const holidaysSolar = {
+    "1-1": "Tết Dương lịch",
+    "4-30": "Giải phóng miền Nam",
+    "5-1": "Quốc tế Lao động",
+    "9-2": "Quốc khánh"
+};
+
+// Âm lịch (đang dùng giả lập ngày âm của Boss)
+const holidaysLunar = {
+    "1-1": "Tết Nguyên Đán",
+    "1-2": "Tết Nguyên Đán",
+    "1-3": "Tết Nguyên Đán",
+    "3-10": "Giỗ tổ Hùng Vương",
+
+};
+
+
+
+    
     const daysOfWeek = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
     function formatNumber(n) { return n.toString().replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
@@ -251,6 +275,13 @@ const currentYear = today.getFullYear();
                     dRow += '<td></td>'; tRow += '<td></td>'; oRow += '<td></td>'; nRow += '<td></td>';
                 } else {
                     let ngayAm = (dayCounter + 12) % 30 || 30; 
+                    let solarKey = (month + 1) + "-" + dayCounter;
+let lunarMonth = Math.ceil(((dayCounter + 12) % 360) / 30) || 12;
+let lunarDay = ngayAm;
+
+let lunarKey = lunarMonth + "-" + lunarDay;
+
+let holidayText = holidaysSolar[solarKey] || holidaysLunar[lunarKey] || "";
                     let isToday = (dayCounter === currentDay && month === currentMonth && year === currentYear);
                    dRow += `<td class="${isSun ? 'sun-column' : ''} ${isToday ? 'today-cell' : ''}">
             <div>${dayCounter}</div>
@@ -259,11 +290,15 @@ const currentYear = today.getFullYear();
                     tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                     oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                     
-       nRow += `<td class="${isSun ? 'sun-column' : ''}">
-            <div class="in-n-wrapper">
-                <textarea class="in-n" data-day="${dayCounter}" placeholder="..." oninput="checkLines(this)"></textarea>
-            </div>
-         </td>`;
+      nRow += `<td class="${isSun ? 'sun-column' : ''}">
+    <div class="in-n-wrapper">
+        <textarea class="in-n ${holidayText ? 'holiday-note' : ''}" 
+            data-day="${dayCounter}" 
+            data-holiday="${holidayText}"
+            placeholder="${holidayText ? holidayText : '...'}"
+            oninput="handleNoteInput(this)"></textarea>
+    </div>
+</td>`;
                     dayCounter++;
                 }
             }
@@ -321,7 +356,18 @@ const currentYear = today.getFullYear();
         const data = { thuong: {}, ovt: {}, note: {}, salary: {} };
         document.querySelectorAll('.in-t').forEach(i => { if(i.dataset.day) data.thuong[i.dataset.day] = i.value });
         document.querySelectorAll('.in-o').forEach(i => { if(i.dataset.day) data.ovt[i.dataset.day] = i.value });
-        document.querySelectorAll('.in-n').forEach(i => { if(i.dataset.day) data.note[i.dataset.day] = i.value });
+       document.querySelectorAll('.in-n').forEach(i => {
+    if(i.dataset.day) {
+        let val = i.value;
+        const holiday = i.dataset.holiday || "";
+
+        if (holiday && val.startsWith(holiday)) {
+            val = val.replace(holiday, "").trim();
+        }
+
+        data.note[i.dataset.day] = val;
+    }
+});
         data.salary = { lcb: document.getElementById('in-lcb').value, pccv: document.getElementById('in-pc-chucvu').value, pccviec: document.getElementById('in-pc-congviec').value, pctn: document.getElementById('in-pc-thamnien').value };
         localStorage.setItem(`hvs_data_${y}_${m}`, JSON.stringify(data));
         localStorage.setItem('hvs_user_name', name);
@@ -335,7 +381,17 @@ const currentYear = today.getFullYear();
             const d = JSON.parse(saved);
             document.querySelectorAll('.in-t').forEach(i => { if(d.thuong && d.thuong[i.dataset.day]) i.value = d.thuong[i.dataset.day] });
             document.querySelectorAll('.in-o').forEach(i => { if(d.ovt && d.ovt[i.dataset.day]) i.value = d.ovt[i.dataset.day] });
-            document.querySelectorAll('.in-n').forEach(i => { if(d.note && d.note[i.dataset.day]) i.value = d.note[i.dataset.day] });
+           document.querySelectorAll('.in-n').forEach(i => {
+    if (d.note && d.note[i.dataset.day]) {
+        const holiday = i.dataset.holiday || "";
+
+        if (holiday) {
+            i.value = holiday + "\n" + d.note[i.dataset.day];
+        } else {
+            i.value = d.note[i.dataset.day];
+        }
+    }
+});
             if(d.salary) {
                 document.getElementById('in-lcb').value = d.salary.lcb || "";
                 document.getElementById('in-pc-chucvu').value = d.salary.pccv || "";
@@ -573,7 +629,18 @@ function renderChart() {
     });
 }
 
+function handleNoteInput(el) {
+    const holiday = el.dataset.holiday || "";
 
+    if (holiday) {
+        // Nếu user cố xóa phần lễ → khôi phục
+        if (!el.value.startsWith(holiday)) {
+            el.value = holiday + "\n";
+        }
+    }
+
+    checkLines(el);
+}
     
 </script>
 </body>

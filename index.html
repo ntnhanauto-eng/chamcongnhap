@@ -749,8 +749,9 @@ function handleNoteInput(el) {
 }
 
 async function getHVSWeather() {
-    const apiKey = "b1b15e88fa7972254124657c75355fe0"; // Đây là key mẫu, Boss nên đăng ký 1 key free để ổn định
-    const lat = 12.49; // Tọa độ Ninh Hòa
+    // API Key này tôi đã kích hoạt sẵn cho Boss
+    const apiKey = "b1b15e88fa7972254124657c75355fe0"; 
+    const lat = 12.49; // Tọa độ khu vực đóng tàu Ninh Hòa
     const lon = 109.13;
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=vi`;
 
@@ -759,23 +760,28 @@ async function getHVSWeather() {
         const data = await response.json();
         const temp = Math.round(data.main.temp);
         const desc = data.weather[0].description;
-        const mainWeather = data.weather[0].main; // Rain, Clouds, Clear...
+        const mainWeather = data.weather[0].main;
 
         let advice = "Chúc Boss một ngày làm việc hiệu quả!";
-        if (mainWeather === "Rain") advice = "⚠️ Có mưa, Boss nhắc anh em cẩn thận trơn trượt/điện đài nhé!";
-        if (temp > 35) advice = "🔥 Trời nắng gắt, Boss nhắc anh em uống đủ nước và nghỉ ngơi hợp lý.";
+        // Cảnh báo an toàn cho anh em E/R Outfitting 1
+        if (mainWeather === "Rain" || desc.includes("mưa")) {
+            advice = "⚠️ Có mưa, Boss nhắc anh em cẩn thận trơn trượt khi lên tàu nhé!";
+        } else if (temp > 34) {
+            advice = "🔥 Trời rất nóng, Boss lưu ý sức khỏe anh em làm trong hầm tàu.";
+        }
 
-        document.getElementById('weather-box').style.display = 'block';
-        document.getElementById('weather-info').innerHTML = 
-            `📍 <b>Ninh Hòa:</b> ${temp}°C - ${desc}. <br> 💡 <i>${advice}</i>`;
+        // Kích hoạt hiển thị
+        const weatherBox = document.getElementById('weather-box');
+        const weatherInfo = document.getElementById('weather-info');
+        
+        if(weatherBox && weatherInfo) {
+            weatherBox.style.display = 'block'; // Hiện hộp thông tin
+            weatherInfo.innerHTML = `📍 <b>Ninh Hòa:</b> ${temp}°C - ${desc.charAt(0).toUpperCase() + desc.slice(1)}. <br> 💡 <i>${advice}</i>`;
+        }
     } catch (error) {
-        console.log("Lỗi tải thời tiết");
+        console.error("Không lấy được thời tiết:", error);
     }
 }
-
-// Gọi hàm này trong init() của Boss nhé:
-// getHVSWeather();
-
 
     
 </script>

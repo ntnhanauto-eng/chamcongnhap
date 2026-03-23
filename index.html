@@ -300,6 +300,47 @@ function init() {
     renderCalendar();
 }
 
+    // --- TÍNH NĂNG NHẮC NHỞ THÔNG MINH ---
+function checkUpcomingHolidays() {
+    const today = new Date();
+    let notifications = [];
+
+    // Kiểm tra trong vòng 7 ngày tới
+    for (let i = 0; i <= 7; i++) {
+        let checkDate = new Date();
+        checkDate.setDate(today.getDate() + i);
+        
+        let d = checkDate.getDate();
+        let m = checkDate.getMonth();
+        let y = checkDate.getFullYear();
+
+        // Kiểm tra Dương lịch
+        let sKey = (m + 1) + "-" + d;
+        if (holidaysSolar[sKey]) {
+            notifications.push(`Sắp đến ngày <b>${holidaysSolar[sKey]}</b> (${d}/${m+1})`);
+        }
+
+        // Kiểm tra Âm lịch
+        let lunar = getLunarDate(d, m, y);
+        let lKey = lunar.month + "-" + lunar.day;
+        if (holidaysLunar[lKey]) {
+            notifications.push(`Sắp đến ngày <b>${holidaysLunar[lKey]}</b> (Âm lịch: ${lunar.day}/${lunar.month})`);
+        }
+    }
+
+    // Hiển thị Banner nếu có thông báo
+    if (notifications.length > 0) {
+        const uniqueNoti = [...new Set(notifications)]; // Xóa trùng lặp
+        const banner = document.createElement('div');
+        banner.style = "background: #fff3cd; color: #856404; padding: 10px; text-align: center; border-bottom: 2px solid #ffeeba; font-size: 14px; position: sticky; top: 0; z-index: 1000;";
+        banner.innerHTML = "🔔 " + uniqueNoti.join(" | ");
+        document.body.prepend(banner);
+    }
+}
+
+// Gọi hàm này trong window.onload hoặc init()
+// checkUpcomingHolidays();
+
 function renderCalendar() {
     const month = parseInt(document.getElementById('month-select').value);
     const year = parseInt(document.getElementById('year-select').value);

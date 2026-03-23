@@ -237,22 +237,7 @@ const holidaysSolar = {
         renderCalendar();
     }
 
-// ===== CHUYỂN DƯƠNG -> ÂM (rút gọn đủ dùng) =====
-function getLunarDate(dd, mm, yy) {
-    const date = new Date(yy, mm, dd);
 
-    // GIẢ LẬP CHU KỲ ÂM (ổn định hơn code cũ)
-    const base = new Date(2024, 1, 10); // Mốc gần Tết thật
-    const diff = Math.floor((date - base) / (1000 * 60 * 60 * 24));
-
-    let lunarDay = (diff % 30 + 30) % 30 + 1;
-    let lunarMonth = (Math.floor(diff / 30) % 12 + 12) % 12 + 1;
-
-    return {
-        day: lunarDay,
-        month: lunarMonth
-    };
-}
 
 // ====== ÂM LỊCH CHUẨN ======
 function INT(d) { return Math.floor(d); }
@@ -323,7 +308,7 @@ function getSunLongitude(jdn, timeZone) {
 
 function getLunarDate(dd, mm, yy) {
     let timeZone = 7.0;
-    let dayNumber = jdFromDate(dd, mm + 1, yy);
+    let dayNumber = jdFromDate(dd, mm + 1, yy) - 1;
 
     let k = INT((dayNumber - 2415021.076998695) / 29.530588853);
     let monthStart = getNewMoonDay(k + 1, timeZone);

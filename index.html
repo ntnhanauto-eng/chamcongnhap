@@ -177,6 +177,24 @@
             </tr>
         </table>
     </div>
+
+<!-- Nút mở đồ thị -->
+<div style="text-align:center; margin-top:20px;">
+    <div id="toggle-chart" onclick="toggleChart()" 
+         style="cursor:pointer; font-weight:bold; color:#007bff; font-size:16px;">
+        📊 ĐỒ THỊ THU NHẬP
+    </div>
+</div>
+
+<!-- Khu vực đồ thị -->
+<div id="chart-container" style="display:none; margin-top:15px;">
+    <canvas id="salaryChart" height="200"></canvas>
+</div>
+
+<!-- Thư viện Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    
 </div>
 
 <div class="footer">
@@ -427,6 +445,111 @@ function setupNoteExpand() {
 
     });
 }
+
+
+let chartInstance = null;
+
+function toggleChart() {
+    const container = document.getElementById('chart-container');
+
+    if (container.style.display === "none") {
+        container.style.display = "block";
+        renderChart();
+    } else {
+        container.style.display = "none";
+    }
+}
+
+function renderChart() {
+    const ctx = document.getElementById('salaryChart').getContext('2d');
+
+    // Lấy dữ liệu 12 tháng
+    let labels = [];
+    let data = [];
+
+    for (let m = 0; m < 12; m++) {
+        labels.push("T" + (m + 1));
+
+        const saved = localStorage.getItem(`hvs_data_${document.getElementById('year-select').value}_${m}`);
+        
+        if (saved) {
+            const d = JSON.parse(saved);
+
+            // Tính lại lương giống logic hiện tại
+            let tNT = 0, oNT = 0, tCN = 0;
+
+            if (d.thuong) {
+                for (let day in d.thuong) {
+                    let val = Number(d.thuong[day]) || 0;
+                    // CN không phân biệt được trong lưu → tạm tính chung
+                    tNT += val;
+                }
+            }
+
+            if (d.ovt) {
+                for (let day in d.ovt) {
+                    let val = Number(d.ovt[day]) || 0;
+                    oNT += val;
+                }
+            }
+
+            const lcb = parseNumber(d.salary?.lcb || 0);
+            const pccv = parseNumber(d.salary?.pccv || 0);
+            const pccv_viec = parseNumber(d.salary?.pccviec || 0);
+            const pctn = parseNumber(d.salary?.pctn || 0);
+
+            const luongCanCuBH = lcb + pccv + pccv_viec + pctn;
+            const luongGio = (lcb / 192) * tNT;
+            const donGia = luongCanCuBH / 192;
+
+            const ovtMoney = (donGia * oNT * 1.5) + (donGia * tCN * 2);
+
+            const bhxh = luongCanCuBH * 0.08;
+            const bhyt = luongCanCuBH * 0.015;
+            const bhtn = luongCanCuBH * 0.01;
+
+            const total = (luongGio + ovtMoney + pccv + pctn + pccv_viec) - (bhxh + bhyt + bhtn);
+
+            data.push(Math.round(total));
+        } else {
+            data.push(0);
+        }
+    }
+
+    // Nếu đã có chart → destroy để tránh chồng
+    if (chartInstance) {
+        chartInstance.destroy();
+    }
+
+    chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Thu nhập (₫)',
+                data: data,
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: true }
+            },
+            scales: {
+                y: {
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString() + " ₫";
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
     
 </script>
 </body>

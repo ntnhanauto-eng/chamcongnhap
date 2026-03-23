@@ -24,10 +24,6 @@
         .note-row { background-color: #fafafa; }
         .in-n-wrapper { position: relative; width: 100%; height: 22px; }
         
-                /* Style cho hàng ghi chú nâng cấp */
-        .note-row { background-color: #fafafa; }
-        .in-n-wrapper { position: relative; width: 100%; height: 22px; }
-        
         .in-n { 
             width: 100%; 
             border: 1px solid transparent; 
@@ -38,7 +34,7 @@
             color: #555; 
             font-style: italic; 
             padding: 2px 0;
-            resize: none; 
+            resize: none; /* Chặn user kéo giãn thủ công */
             overflow: hidden;
             display: block;
             box-sizing: border-box;
@@ -50,35 +46,34 @@
             white-space: nowrap;
         }
 
-        /* Phóng to gấp 3 lần (khoảng 66px-70px) khi focus */
         .in-n:focus { 
             background-color: #e8f0fe !important; 
             font-style: normal; 
             color: #000; 
-            height: 70px !important; 
+            height: 80px !important; /* Mở rộng khi bấm vào */
             z-index: 100;
             border: 1px solid #007bff;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             white-space: normal;
             overflow-y: auto;
             text-align: left;
             padding: 5px;
         }
 
-        /* Đốm xanh thông báo có nhiều dòng */
+       /* Đốm xanh thông báo có nhiều dòng */
         .has-multi-line::after {
-            content: "";
+            content: ""; /* Xóa icon cũ */
             position: absolute;
             top: 3px;
             right: 3px;
-            width: 6px;
-            height: 6px;
-            background-color: #28a745;
-            border-radius: 50%;
+            width: 6px;   /* Độ rộng đốm tròn */
+            height: 6px;  /* Độ cao đốm tròn */
+            background-color: #28a745; /* Màu xanh lá (hoặc #007bff nếu Boss thích xanh dương) */
+            border-radius: 50%; /* Làm tròn thành dấu chấm */
             z-index: 2;
             pointer-events: none;
+            box-shadow: 0 0 2px rgba(0,0,0,0.2);
         }
-
 
         .summary-wrapper { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; border-top: 2px solid #eee; padding-top: 15px; }
         .salary-table { width: 100%; border: 1px solid var(--border-color); border-collapse: collapse; }
@@ -231,13 +226,11 @@
                     tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                     oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
                     
-       // Tìm và thay thế dòng nRow cũ trong vòng lặp renderCalendar
-nRow += `<td class="${isSun ? 'sun-column' : ''}">
+       nRow += `<td class="${isSun ? 'sun-column' : ''}">
             <div class="in-n-wrapper">
                 <textarea class="in-n" data-day="${dayCounter}" placeholder="..." oninput="checkLines(this)"></textarea>
             </div>
          </td>`;
-
                     dayCounter++;
                 }
             }
@@ -382,28 +375,7 @@ loadSavedData = function() {
     }, 100);
 }
 
-function checkLines(el) {
-    // Nếu có dấu xuống dòng hoặc nội dung dài, hiện đốm xanh
-    const hasNewLine = el.value.includes('\n');
-    const parent = el.parentElement;
-    if (hasNewLine && el.value.trim() !== "") {
-        parent.classList.add('has-multi-line');
-    } else {
-        parent.classList.remove('has-multi-line');
-    }
-}
 
-// Cập nhật lại logic load dữ liệu để quét đốm xanh
-const oldLoadSavedData = loadSavedData;
-loadSavedData = function() {
-    oldLoadSavedData();
-    setTimeout(() => {
-        document.querySelectorAll('.in-n').forEach(el => checkLines(el));
-    }, 200);
-}
-
-
-    
     
 </script>
 </body>

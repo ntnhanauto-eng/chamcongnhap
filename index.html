@@ -496,11 +496,7 @@ function loadSavedData() {
     }
 }
 
-function handleNoteInput(el) {
-    const holiday = el.dataset.holiday || "";
-    if (holiday && !el.value.startsWith(holiday)) el.value = holiday + "\n" + el.value.trimStart();
-    checkLines(el);
-}
+
 
 function checkLines(el) {
     const hasNewLine = el.value.includes('\n');

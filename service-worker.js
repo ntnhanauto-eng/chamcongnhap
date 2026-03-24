@@ -1,4 +1,4 @@
-const CACHE_NAME = "hvs-cache-v1";
+const CACHE_NAME = "hvs-cache-v2";
 
 const urlsToCache = [
   "/",

@@ -755,6 +755,9 @@ if ("serviceWorker" in navigator) {
         .catch(err => console.log("SW error", err));
 }
 
+navigator.serviceWorker.addEventListener("controllerchange", () => {
+    alert("🔥 App đã cập nhật phiên bản mới!");
+});    
     
 </script>
 </body>

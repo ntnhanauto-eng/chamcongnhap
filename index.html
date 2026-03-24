@@ -144,11 +144,19 @@
     <div style="text-align: center; margin-bottom: 15px;">
         <input type="text" id="user-name" placeholder="Nhập họ tên của bạn..." style="width: 80%; padding: 8px; border: 1px solid #ccc; border-radius: 20px; text-align: center; font-weight: bold; color: #d9534f;">
     </div>
+
+    
+    <div id="today-info" style="text-align:center; margin-top:-8px; margin-bottom:10px; font-size:13px; font-weight:bold; color:#007bff;">
+    <!-- Sẽ được JS điền -->
+</div>
+
+
     
     <div class="setup-section">
         <select id="month-select" onchange="renderCalendar()" style="flex:2"></select>
         <input type="number" id="year-select" value="2026" onchange="renderCalendar()" style="flex:1">
     </div>
+
 
     <div id="calendar-content"></div>
 
@@ -297,6 +305,7 @@ function init() {
     monthSel.value = new Date().getMonth();
     const savedName = localStorage.getItem('hvs_user_name');
     if (savedName) document.getElementById('user-name').value = savedName;
+    renderTodayInfo(); // ✅ THÊM DÒNG NÀY
     renderCalendar();
 }
 
@@ -743,6 +752,20 @@ function handleNoteInput(el) {
     }
 
     checkLines(el);
+}
+
+function renderTodayInfo() {
+    const el = document.getElementById("today-info");
+    const now = new Date();
+
+    const days = ["Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy"];
+
+    const dayName = days[now.getDay()];
+    const d = now.getDate();
+    const m = now.getMonth() + 1;
+    const y = now.getFullYear();
+
+    el.innerText = `${dayName}, ngày ${d} tháng ${m} năm ${y}`;
 }
     
 </script>

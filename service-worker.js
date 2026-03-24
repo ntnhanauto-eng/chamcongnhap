@@ -10,15 +10,39 @@ const urlsToCache = [
   "https://cdn.jsdelivr.net/npm/chart.js"
 ];
 
-// Cài SW
+// 🟢 Cài đặt
 self.addEventListener("install", event => {
+  console.log("SW: Installing...");
+
+  self.skipWaiting(); // 🔥 update ngay
+
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(urlsToCache))
   );
 });
 
-// Load từ cache trước
+// 🟢 Kích hoạt + xóa cache cũ
+self.addEventListener("activate", event => {
+  console.log("SW: Activating...");
+
+  event.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            console.log("Deleting old cache:", key);
+            return caches.delete(key); // 🔥 XÓA BẢN CŨ
+          }
+        })
+      );
+    })
+  );
+
+  return self.clients.claim(); // 🔥 áp dụng ngay
+});
+
+// 🟢 Fetch (offline vẫn chạy)
 self.addEventListener("fetch", event => {
   event.respondWith(
     caches.match(event.request)

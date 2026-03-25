@@ -9,7 +9,7 @@ const urlsToCache = [
 
 // Cài đặt SW + cache
 self.addEventListener("install", event => {
- self.skipWaiting(); // 🔥 bắt buộc để update ngay
+ // self.skipWaiting(); // 🔥 bắt buộc để update ngay
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(urlsToCache))

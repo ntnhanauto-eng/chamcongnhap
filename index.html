@@ -799,7 +799,7 @@ if ("serviceWorker" in navigator) {
     // 🔥 reload khi SW mới active
    let refreshing = false;
 
-/*navigator.serviceWorker.addEventListener("controllerchange", () => {
+navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (refreshing) return;
     refreshing = true;
 
@@ -809,7 +809,7 @@ if ("serviceWorker" in navigator) {
     }, 5000);
 });
 }
-*/
+
 
 /*navigator.serviceWorker.addEventListener('controllerchange', function () {
     location.reload();

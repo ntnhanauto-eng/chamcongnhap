@@ -415,7 +415,7 @@ function renderCalendar() {
             <td colspan="9" style="
                 text-align:center;
                 font-weight:bold;
-                font-size:14px;
+                font-size:16px;
                 background:#f0f8ff;
                 color:#007bff;
                 padding:6px;
@@ -854,7 +854,22 @@ function updateApp() {
     });
 }
 
-
+const monthRow = `
+    <tr>
+        <td colspan="9" style="
+            text-align:center;
+            font-weight:bold;
+            font-size:20px; /* 🔥 tăng size */
+            background:#f0f8ff;
+            color:#007bff;
+            padding:10px 6px; /* 🔥 tăng padding cho thoáng */
+            border-bottom:2px solid #007bff;
+            letter-spacing:1px; /* 🔥 giãn chữ cho đẹp */
+        ">
+            Tháng ${month + 1} / ${year}
+        </td>
+    </tr>
+`;
 
     
 </script>

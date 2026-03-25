@@ -218,7 +218,7 @@
 
 <script>
 
-const APP_VERSION = "v4";
+const APP_VERSION = "v4"; // 🔥 đổi mỗi lần update
 console.log("VERSION HVS " + APP_VERSION);
     
 // --- 1. CẤU HÌNH NGÀY LỄ ---
@@ -302,6 +302,7 @@ function getSunLongitude(jdn, timeZone) {
 
 // --- 3. LOGIC HIỂN THỊ VÀ TÍNH TOÁN (ĐÃ FIX) ---
 function init() {
+     document.getElementById("app-version").innerText = "HVS " + APP_VERSION;
     const monthSel = document.getElementById('month-select');
     for(let i=0; i<12; i++) {
         let opt = document.createElement('option');
@@ -764,5 +765,13 @@ navigator.serviceWorker.addEventListener('controllerchange', function () {
 });
     
 </script>
+   </div>
+
+<div class="footer">
+
+    <div id="app-version" 
+     style="position:fixed; bottom:5px; right:8px; font-size:11px; color:#666; z-index:9999;">
+</div>
+    
 </body>
 </html>

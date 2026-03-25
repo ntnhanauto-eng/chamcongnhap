@@ -1,4 +1,4 @@
-const CACHE_NAME = "hvs-" + "v20.3"; // 🔥 đổi version mỗi lần update
+const CACHE_NAME = "hvs-" + "v20.4"; // 🔥 đổi version mỗi lần update
 const urlsToCache = [
   "./",
   "./index.html",

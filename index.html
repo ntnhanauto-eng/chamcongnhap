@@ -777,13 +777,21 @@ if ("serviceWorker" in navigator) {
     }).catch(err => console.log("SW error", err));
 
     // 🔥 reload khi SW mới active
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
+  /*  navigator.serviceWorker.addEventListener("controllerchange", () => {
         location.reload();
     });
 }
+*/
+let refreshing = false;
 
-navigator.serviceWorker.addEventListener('controllerchange', function () {
-    location.reload();
+navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (refreshing) return;
+    refreshing = true;
+
+    // Delay reload 5 giây
+    setTimeout(() => {
+        location.reload();
+    }, 5000);
 });
 
 function showUpdateBanner() {
@@ -791,9 +799,11 @@ function showUpdateBanner() {
 
     const banner = document.createElement("div");
     banner.id = "update-banner";
+
     banner.innerHTML = `
         🚀 Có phiên bản mới!
-        <button onclick="updateApp()" style="margin-left:10px;padding:5px 10px;border:none;border-radius:4px;background:#fff;color:#007bff;font-weight:bold;">
+        <button onclick="updateApp()" 
+            style="margin-left:10px;padding:5px 10px;border:none;border-radius:4px;background:#fff;color:#007bff;font-weight:bold;">
             Cập nhật
         </button>
     `;
@@ -812,6 +822,11 @@ function showUpdateBanner() {
     `;
 
     document.body.appendChild(banner);
+
+    // ⏳ AUTO UPDATE sau 10 giây (Boss chỉnh tùy ý)
+    setTimeout(() => {
+        updateApp();
+    }, 10000);
 }
 
 function updateApp() {

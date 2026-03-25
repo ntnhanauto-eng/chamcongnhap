@@ -755,6 +755,10 @@ if ("serviceWorker" in navigator) {
         reg.update(); // 🔥 ép check update
     });
 }
+
+navigator.serviceWorker.addEventListener('controllerchange', function () {
+    location.reload();
+});
     
 </script>
 </body>

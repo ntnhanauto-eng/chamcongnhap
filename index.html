@@ -751,10 +751,10 @@ function renderTodayInfo() {
 
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("service-worker.js")
-        .then(() => console.log("SW registered"))
-        .catch(err => console.log("SW error", err));
+    .then(reg => {
+        reg.update(); // 🔥 ép check update
+    });
 }
-
     
 </script>
 </body>

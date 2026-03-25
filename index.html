@@ -754,15 +754,76 @@ function renderTodayInfo() {
 }
 
 if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js")
-    .then(reg => {
-        reg.update(); // 🔥 ép check update
+    navigator.serviceWorker.register("service-worker.js").then(reg => {
+
+        console.log("SW registered");
+
+        // 🔥 check update liên tục
+        setInterval(() => {
+            reg.update();
+        }, 5000);
+
+        // 🔥 phát hiện có bản mới
+        reg.onupdatefound = () => {
+            const newWorker = reg.installing;
+
+            newWorker.onstatechange = () => {
+                if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+                    showUpdateBanner();
+                }
+            };
+        };
+
+    }).catch(err => console.log("SW error", err));
+
+    // 🔥 reload khi SW mới active
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+        location.reload();
     });
 }
 
 navigator.serviceWorker.addEventListener('controllerchange', function () {
     location.reload();
 });
+
+function showUpdateBanner() {
+    if (document.getElementById("update-banner")) return;
+
+    const banner = document.createElement("div");
+    banner.id = "update-banner";
+    banner.innerHTML = `
+        🚀 Có phiên bản mới!
+        <button onclick="updateApp()" style="margin-left:10px;padding:5px 10px;border:none;border-radius:4px;background:#fff;color:#007bff;font-weight:bold;">
+            Cập nhật
+        </button>
+    `;
+
+    banner.style = `
+        position:fixed;
+        top:0;
+        left:0;
+        right:0;
+        background:#007bff;
+        color:white;
+        text-align:center;
+        padding:10px;
+        z-index:9999;
+        font-size:14px;
+    `;
+
+    document.body.appendChild(banner);
+}
+
+function updateApp() {
+    navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg && reg.waiting) {
+            reg.waiting.postMessage({ action: "skipWaiting" });
+        }
+    });
+}
+
+
+
     
 </script>
    </div>

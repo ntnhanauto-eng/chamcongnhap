@@ -409,7 +409,27 @@ function renderCalendar() {
         hRow += '<td class="total-cell">TỔNG</td></tr>'; dRow += '<td></td></tr>';
         tRow += '<td class="total-cell w-t">0</td></tr>'; oRow += '<td class="total-cell w-o">0</td></tr>';
         nRow += '<td></td></tr>';
-        table.innerHTML = hRow + dRow + tRow + oRow + nRow;
+        if (container.children.length === 0) {
+    const monthRow = `
+        <tr>
+            <td colspan="9" style="
+                text-align:center;
+                font-weight:bold;
+                font-size:14px;
+                background:#f0f8ff;
+                color:#007bff;
+                padding:6px;
+                border-bottom:2px solid #007bff;
+            ">
+                Tháng ${month + 1} / ${year}
+            </td>
+        </tr>
+    `;
+
+    table.innerHTML = monthRow + hRow + dRow + tRow + oRow + nRow;
+} else {
+    table.innerHTML = hRow + dRow + tRow + oRow + nRow;
+}
         wrap.appendChild(table);
         container.appendChild(wrap);
         startPos = 0;

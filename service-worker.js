@@ -1,58 +1,47 @@
-const CACHE_NAME = "hvs-cache-v4";
-
+const CACHE_NAME = "hvs-v3"; // 🔥 đổi version mỗi lần update
 const urlsToCache = [
-  "/",
-  "index.html",
-  "manifest.json",
-  "icon-192.png",
-  "icon-512.png",
-  "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
-  "https://cdn.jsdelivr.net/npm/chart.js"
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./icon-192.png",
+  "./icon-512.png"
 ];
 
-// 🟢 Cài đặt
+// Cài đặt SW + cache
 self.addEventListener("install", event => {
-  console.log("SW: Installing...");
-
-  self.skipWaiting(); // 🔥 update ngay
-
+  self.skipWaiting(); // 🔥 bắt buộc để update ngay
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(urlsToCache))
   );
 });
 
-// 🟢 Kích hoạt + xóa cache cũ
+// Kích hoạt SW mới
 self.addEventListener("activate", event => {
-  console.log("SW: Activating...");
-
   event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
+    caches.keys().then(keys =>
+      Promise.all(
         keys.map(key => {
           if (key !== CACHE_NAME) {
-            console.log("Deleting old cache:", key);
-            return caches.delete(key); // 🔥 XÓA BẢN CŨ
+            return caches.delete(key); // 🔥 xóa cache cũ
           }
         })
-      );
-    })
+      )
+    )
   );
-
-  return self.clients.claim(); // 🔥 áp dụng ngay
+  self.clients.claim(); // 🔥 chiếm quyền ngay
 });
 
-// 🟢 Fetch (offline vẫn chạy)
+// Fetch (luôn lấy bản mới trước)
 self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
+    fetch(event.request)
+      .then(res => {
+        return caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, res.clone());
+          return res;
+        });
+      })
+      .catch(() => caches.match(event.request))
   );
-});
-
-// 🔔 Lắng nghe message từ client (web)
-self.addEventListener("message", (event) => {
-  if (event.data === "SKIP_WAITING") {
-    self.skipWaiting();
-  }
 });

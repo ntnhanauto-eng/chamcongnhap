@@ -777,7 +777,7 @@ if ("serviceWorker" in navigator) {
     }).catch(err => console.log("SW error", err));
 
     // 🔥 reload khi SW mới active
-   /* navigator.serviceWorker.addEventListener("controllerchange", () => {
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
         location.reload();
     });
 }
@@ -785,7 +785,6 @@ if ("serviceWorker" in navigator) {
 navigator.serviceWorker.addEventListener('controllerchange', function () {
     location.reload();
 });
-*/
 
 function showUpdateBanner() {
     if (document.getElementById("update-banner")) return;
@@ -819,14 +818,10 @@ function updateApp() {
     navigator.serviceWorker.getRegistration().then(reg => {
         if (reg && reg.waiting) {
             reg.waiting.postMessage({ action: "skipWaiting" });
-
-            // 👉 chỉ reload khi user bấm
-            setTimeout(() => {
-                location.reload();
-            }, 500);
         }
     });
 }
+
 
 
     

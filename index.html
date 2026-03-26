@@ -799,6 +799,8 @@ if ("serviceWorker" in navigator) {
     // 🔥 reload khi SW mới active
    let refreshing = false;
 
+let refreshing = false;
+
 navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (refreshing) return;
     refreshing = true;
@@ -808,7 +810,6 @@ navigator.serviceWorker.addEventListener("controllerchange", () => {
         location.reload();
     }, 5000);
 });
-
 }
 
 

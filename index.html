@@ -803,6 +803,15 @@ if ("serviceWorker" in navigator) {
 }
 
 
+navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (refreshing) return;
+    refreshing = true;
+
+    // 🔥 Auto reload sau 5 giây khi có version mới
+    setTimeout(() => {
+        location.reload();
+    }, 5000);
+});
 /*navigator.serviceWorker.addEventListener('controllerchange', function () {
     location.reload();
 }); */
@@ -843,13 +852,9 @@ function updateApp() {
     navigator.serviceWorker.getRegistration().then(reg => {
         if (reg && reg.waiting) {
             reg.waiting.postMessage({ action: "skipWaiting" });
-
-            // 👉 chỉ reload khi user bấm
-            window.location.reload();
         }
     });
 }
-
 
     
 </script>

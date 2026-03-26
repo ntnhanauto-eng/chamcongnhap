@@ -784,15 +784,24 @@ if ("serviceWorker" in navigator) {
         }, 5000);
 
         // 🔥 phát hiện có bản mới
-        reg.onupdatefound = () => {
-            const newWorker = reg.installing;
+      reg.onupdatefound = () => {
+    const newWorker = reg.installing;
 
-            newWorker.onstatechange = () => {
-                if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-                    showUpdateBanner();
-                }
-            };
-        };
+    newWorker.onstatechange = () => {
+        if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+
+            console.log("🔥 Có version mới → auto update");
+
+            // ⛔ bỏ banner
+            // showUpdateBanner();
+
+            // ✅ Tự update sau 2 giây
+            setTimeout(() => {
+                updateApp();
+            }, 2000);
+        }
+    };
+};
 
     }).catch(err => console.log("SW error", err));
 

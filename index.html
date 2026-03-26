@@ -218,7 +218,7 @@
 
 <script>
 
-const APP_VERSION = "v20.8"; // 🔥 đổi mỗi lần update
+const APP_VERSION = "v20.5"; // 🔥 đổi mỗi lần update
 console.log("VERSION HVS " + APP_VERSION);
     
 // --- 1. CẤU HÌNH NGÀY LỄ ---
@@ -415,7 +415,7 @@ function renderCalendar() {
             <td colspan="9" style="
                 text-align:center;
                 font-weight:bold;
-                font-size:16px;
+                font-size:17px;
                 background:#f0f8ff;
                 color:#007bff;
                 padding:6px;
@@ -798,9 +798,6 @@ if ("serviceWorker" in navigator) {
 
     // 🔥 reload khi SW mới active
    let refreshing = false;
-
-let refreshing = false;
-
 navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (refreshing) return;
     refreshing = true;
@@ -810,6 +807,7 @@ navigator.serviceWorker.addEventListener("controllerchange", () => {
         location.reload();
     }, 5000);
 });
+
 }
 
 
@@ -849,12 +847,17 @@ function showUpdateBanner() {
   
 }
 
-function updateApp() {
-    navigator.serviceWorker.getRegistration().then(reg => {
-        if (reg && reg.waiting) {
-            reg.waiting.postMessage({ action: "skipWaiting" });
-        }
-    });
+let refreshing = false;
+
+navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (refreshing) return;
+    refreshing = true;
+
+    // 🔥 Auto reload sau 5 giây khi có version mới
+    setTimeout(() => {
+        location.reload();
+    }, 5000);
+});
 }
 
 

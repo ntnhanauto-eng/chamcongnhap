@@ -218,7 +218,7 @@
 
 <script>
 
-const APP_VERSION = "v20.8"; // 🔥 đổi mỗi lần update
+const APP_VERSION = "v20.5"; // 🔥 đổi mỗi lần update
 console.log("VERSION HVS " + APP_VERSION);
     
 // --- 1. CẤU HÌNH NGÀY LỄ ---
@@ -798,15 +798,7 @@ if ("serviceWorker" in navigator) {
 
     // 🔥 reload khi SW mới active
    let refreshing = false;
-navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (refreshing) return;
-    refreshing = true;
 
-    // 🔥 Auto reload sau 5 giây khi có version mới
-    setTimeout(() => {
-        location.reload();
-    }, 5000);
-});
 
 }
 
@@ -847,17 +839,15 @@ function showUpdateBanner() {
   
 }
 
-let refreshing = false;
+function updateApp() {
+    navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg && reg.waiting) {
+            reg.waiting.postMessage({ action: "skipWaiting" });
 
-navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (refreshing) return;
-    refreshing = true;
-
-    // 🔥 Auto reload sau 5 giây khi có version mới
-    setTimeout(() => {
-        location.reload();
-    }, 5000);
-});
+            // 👉 chỉ reload khi user bấm
+            window.location.reload();
+        }
+    });
 }
 
 

@@ -203,6 +203,28 @@
 
 <!-- Khu vực đồ thị -->
 <div id="chart-container" style="display:none; margin-top:15px;">
+
+    <!-- HOÀN THUẾ -->
+<div style="margin-top:20px; border-top:2px solid #eee; padding-top:15px; text-align:center;">
+    
+    <div onclick="toggleTax()" 
+         style="cursor:pointer; font-weight:bold; color:#28a745; font-size:16px;">
+        💰 HOÀN THUẾ
+    </div>
+
+    <div id="tax-container" style="display:none; margin-top:10px;">
+        <div style="margin-bottom:10px;">
+            <input type="number" id="tax-dependent" placeholder="Số người phụ thuộc"
+                   style="padding:8px; width:200px; text-align:center;">
+        </div>
+
+        <div id="tax-result" 
+             style="font-weight:bold; font-size:18px; color:#d9534f;">
+            0 ₫
+        </div>
+    </div>
+
+</div>
     <canvas id="salaryChart" height="200"></canvas>
 </div>
 

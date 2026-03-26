@@ -797,12 +797,12 @@ if ("serviceWorker" in navigator) {
     }).catch(err => console.log("SW error", err));
 
     // 🔥 reload khi SW mới active
-   let refreshing = false;
+   
 
 
 }
 
-
+ let refreshing = false;
 navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (refreshing) return;
     refreshing = true;

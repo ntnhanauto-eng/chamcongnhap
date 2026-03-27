@@ -218,7 +218,7 @@
 
 <script>
 
-const APP_VERSION = "v21.7"; // 🔥 đổi mỗi lần update
+const APP_VERSION = "v21.6"; // 🔥 đổi mỗi lần update
 console.log("VERSION HVS " + APP_VERSION);
     
 // --- 1. CẤU HÌNH NGÀY LỄ ---
@@ -864,58 +864,6 @@ function updateApp() {
         }
     });
 }
-
-function calculate() {
-    // --- TÍNH GIỜ ---
-    let tNT = 0, oNT = 0, tCN = 0; // Thường, OVT, Chủ nhật
-    document.querySelectorAll('.table-responsive').forEach(wrap => {
-        let wT = 0, wO = 0;
-        wrap.querySelectorAll('.in-t').forEach(input => {
-            let val = Number(input.value) || 0; 
-            wT += val;
-            if (input.classList.contains('is-sun')) tCN += val; else tNT += val;
-        });
-        wrap.querySelectorAll('.in-o').forEach(input => {
-            let val = Number(input.value) || 0; 
-            wO += val;
-            if (input.classList.contains('is-sun')) tCN += val; else oNT += val;
-        });
-        wrap.querySelector('.w-t').innerText = wT;
-        wrap.querySelector('.w-o').innerText = wO;
-    });
-    document.getElementById('res-thuong').innerText = tNT;
-    document.getElementById('res-ovt').innerText = oNT;
-    document.getElementById('res-cn').innerText = tCN;
-
-    // --- TÍNH LƯƠNG ---
-    const lcb = parseNumber(document.getElementById('in-lcb').value);
-    const luongGio = lcb * tNT;
-    const ovtMoney = lcb * oNT;
-    const pcChucVu = parseNumber(document.getElementById('in-pc-chucvu').value);
-    const pcCongViec = parseNumber(document.getElementById('in-pc-congviec').value);
-    const pcThamNien = parseNumber(document.getElementById('in-pc-thamnien').value);
-
-    const totalIncome = luongGio + ovtMoney + pcChucVu + pcCongViec + pcThamNien;
-
-    // --- BHXH / BHYT / BHTN ---
-    const bhxh = Math.round(totalIncome * 0.08);
-    const bhyt = Math.round(totalIncome * 0.015);
-    const bhtn = Math.round(totalIncome * 0.01);
-
-    const actualReceive = totalIncome - bhxh - bhyt - bhtn;
-
-    // --- HIỂN THỊ ---
-    document.getElementById('lbl-luong-gio').innerText = formatNumber(luongGio);
-    document.getElementById('lbl-ovt-money').innerText = formatNumber(ovtMoney);
-    document.getElementById('lbl-bhxh').innerText = formatNumber(bhxh);
-    document.getElementById('lbl-bhyt').innerText = formatNumber(bhyt);
-    document.getElementById('lbl-bhtn').innerText = formatNumber(bhtn);
-    document.getElementById('lbl-total').innerText = formatNumber(actualReceive);
-
-    // --- CẬP NHẬT ĐỒ THỊ NẾU ĐANG HIỂN THỊ ---
-    updateChart(luongGio, ovtMoney, pcChucVu + pcCongViec + pcThamNien, actualReceive);
-}
-
 
     
 </script>

@@ -1,53 +1,879 @@
-const CACHE_NAME = "hvs-" + "v21.7"; // 🔥 đổi version mỗi lần update
-const urlsToCache = [
-  "./",
-  "./index.html",
-  "./manifest.json",
-  "./icon-192.png",
-  "./icon-512.png"
-];
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#007bff">
+<link rel="apple-touch-icon" href="icon-192.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THEO DÕI NHẬP CÔNG</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root { --green-bg: #c6e0b4; --yellow-bg: #ffe699; --orange-bg: #f8cbad; --border-color: #444; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 8px; background-color: #f0f2f5; font-size: 13px; }
+        .container { max-width: 100%; margin: auto; background: white; padding: 12px; border-radius: 8px; }
+        .setup-section { background: #f8f9fa; padding: 8px; border-radius: 6px; margin-bottom: 12px; display: flex; gap: 10px; border: 1px solid #ddd; }
+        select, input { padding: 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 15px; }
+        .table-responsive { width: 100%; overflow-x: auto; margin-bottom: 15px; border: 1px solid var(--border-color); }
+        table { width: 100%; min-width: 340px; border-collapse: collapse; table-layout: fixed; }
+        th, td { border: 1px solid var(--border-color); text-align: center; padding: 4px 1px; }
+        .header-green { background-color: var(--green-bg); font-weight: bold; font-size: 12px; }
+        .label-cell { text-align: left; padding-left: 3px; font-weight: bold; width: 50px; background: #fdfdfd; font-size: 11px; }
+        .total-cell { background-color: #eee; font-weight: bold; width: 40px; font-size: 11px; }
+        .sun-column { background-color: #fff0f0; color: red; }
+        input.cell-input { width: 100%; border: none; text-align: center; font-size: 16px; outline: none; background: transparent; font-weight: bold; padding: 2px 0; }
+        
+       /* Style cho hàng ghi chú nâng cấp */
+        .note-row { background-color: #fafafa; }
+        .in-n-wrapper { position: relative; width: 100%; height: 20px; }
+        
+        .in-n { 
+            width: 100%; 
+            border: 1px solid transparent; 
+            text-align: center; 
+            font-size: 11px; 
+            outline: none; 
+            background: transparent; 
+            color: #555; 
+            font-style: italic; 
+            padding: 2px 0;
+            resize: none; /* Chặn user kéo giãn thủ công */
+            overflow: hidden;
+            display: block;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 1;
+            height: 22px;
+            white-space: nowrap;
+        }
 
-// Cài đặt SW + cache
-self.addEventListener("install", event => {
- self.skipWaiting(); // 🔥 bắt buộc để update ngay
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
-  );
-});
+        .in-n:focus { 
+            background-color: #e8f0fe !important; 
+            font-style: normal; 
+            color: #000; 
+            height: 80px !important; /* Mở rộng khi bấm vào */
+            z-index: 100;
+            border: 1px solid #007bff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            white-space: normal;
+            overflow-y: auto;
+            text-align: left;
+            padding: 5px;
+        }
 
-// Kích hoạt SW mới
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key); // 🔥 xóa cache cũ
-          }
-        })
-      )
-    )
-  );
-  self.clients.claim(); // 🔥 chiếm quyền ngay
-});
+       /* Đốm xanh thông báo có nhiều dòng */
+        .has-multi-line::after {
+            content: ""; /* Xóa icon cũ */
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 6px;   /* Độ rộng đốm tròn */
+            height: 6px;  /* Độ cao đốm tròn */
+            background-color: #28a745; /* Màu xanh lá (hoặc #007bff nếu Boss thích xanh dương) */
+            border-radius: 50%; /* Làm tròn thành dấu chấm */
+            z-index: 2;
+            pointer-events: none;
+            box-shadow: 0 0 2px rgba(0,0,0,0.2);
+        }
 
-// Fetch (luôn lấy bản mới trước)
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    fetch(event.request)
-      .then(res => {
-        return caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, res.clone());
-          return res;
+        .summary-wrapper { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; border-top: 2px solid #eee; padding-top: 15px; }
+        .salary-table { width: 100%; border: 1px solid var(--border-color); border-collapse: collapse; }
+        .salary-table td { padding: 8px; border: 1px solid #ddd; font-size: 15px; }
+        .salary-table input { border: none; text-align: right; font-weight: bold; font-size: 15px; background: #fffdf0; width: 100%; padding: 4px; box-sizing: border-box; color: #00008B; }
+        .auto-calc { font-weight: bold; text-align: right; color: #000000; padding-right: 5px; }
+        
+        .button-group { display: flex; gap: 8px; margin-bottom: 15px; width: 100%; }
+        .btn-save { flex: 5; background-color: #28a745; color: white; padding: 12px 5px; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; }
+        .btn-export { flex: 2.5; background-color: #007bff; color: white; padding: 12px 5px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; }
+        .btn-reset { flex: 1.5; background-color: #6c757d; color: white; padding: 12px 5px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; }
+        
+        .final-row { background-color: var(--yellow-bg); font-weight: bold; }
+        .footer { margin-top: 30px; padding: 20px 0; text-align: center; border-top: 1px solid #eee; color: #888; font-size: 11px; }
+
+
+/* Hiệu ứng sáng viền khi click vào ô nhập liệu */
+        input:focus, select:focus {
+            border-color: #007bff !important;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+            background-color: #ffffff !important;
+            outline: none;
+            transition: all 0.2s ease-in-out;
+            z-index: 10;
+            position: relative;
+        }
+
+        /* Riêng cho các ô trong bảng công để nổi bật hơn */
+        .cell-input:focus {
+            background-color: #fff9c4 !important; /* Đổi màu nền nhẹ cho ô công khi nhập */
+            transform: scale(1.05); /* Phóng nhẹ ô để dễ nhìn trên điện thoại */
+        }
+
+        /* Hiệu ứng cho ô ghi chú */
+        .in-n:focus {
+            background-color: #e8f0fe !important;
+            font-style: normal;
+            color: #000;
+        }
+
+
+
+        .today-cell {
+    background-color: #00d4ff !important; /* xanh nổi bật */
+    color: #000;
+    font-weight: bold;
+    border: 2px solid #007bff !important;
+}
+
+.holiday-note {
+    border: 1.5px solid #ff9800 !important;
+    background-color: #fff7ed;
+}
+        
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <div style="width: 30px;"></div> 
+        <h2 style="margin: 0; font-size: 1.1rem;">QUẢN LÝ NHẬP CÔNG</h2>
+        <button onclick="shareWeb()" style="background: none; border: none; cursor: pointer; padding: 5px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#007bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+        </button>
+    </div>
+
+    <div style="text-align: center; margin-bottom: 15px;">
+        <input type="text" id="user-name" placeholder="Nhập họ tên của bạn..." style="width: 80%; padding: 8px; border: 1px solid #ccc; border-radius: 20px; text-align: center; font-weight: bold; color: #d9534f;">
+    </div>
+
+    
+    <div id="today-info" style="text-align:center; margin-top:-8px; margin-bottom:10px; font-size:13px; font-weight:bold; color:#007bff;">
+    <!-- Sẽ được JS điền -->
+</div>
+
+
+    
+    <div class="setup-section">
+        <select id="month-select" onchange="renderCalendar()" style="flex:2"></select>
+        <input type="number" id="year-select" value="2026" onchange="renderCalendar()" style="flex:1">
+    </div>
+
+
+    <div id="calendar-content"></div>
+
+    <div class="summary-wrapper">
+        <div class="button-group">
+            <button class="btn-save" onclick="saveData()">LƯU DỮ LIỆU</button>
+            <button class="btn-export" onclick="exportImage()">XUẤT ẢNH</button>
+            <button class="btn-reset" onclick="resetData()">RESET</button>
+        </div>
+        
+        <table style="width: 100%; margin-bottom: 5px; border: 1px solid #444;">
+            <tr><td class="label-cell" style="background:var(--green-bg)">Tổng Thường</td><td id="res-thuong" style="font-weight:bold; text-align:right; padding-right:10px">0</td></tr>
+            <tr><td class="label-cell" style="background:var(--orange-bg)">Tổng OVT</td><td id="res-ovt" style="font-weight:bold; text-align:right; padding-right:10px">0</td></tr>
+            <tr><td class="label-cell" style="background:#ffdada; color:red;">Tổng CN</td><td id="res-cn" style="font-weight:bold; text-align:right; padding-right:10px; color:red;">0</td></tr>
+        </table>
+
+        <table class="salary-table">
+            <tr><td class="label-cell" style="width:120px">LCB</td><td><input type="text" id="in-lcb" value="" oninput="formatInput(this); calculate()"></td></tr>
+            <tr style="background: #f9f9f9;"><td class="label-cell">Lương giờ</td><td id="lbl-luong-gio" class="auto-calc">0</td></tr>
+            <tr><td class="label-cell">Thêm giờ</td><td id="lbl-ovt-money" class="auto-calc">0</td></tr>
+            <tr><td class="label-cell">PC Chức vụ</td><td><input type="text" id="in-pc-chucvu" value="" oninput="formatInput(this); calculate()"></td></tr>
+            <tr><td class="label-cell">PC C.Việc</td><td><input type="text" id="in-pc-congviec" value="" oninput="formatInput(this); calculate()"></td></tr>
+            <tr><td class="label-cell">PC Thâm niên</td><td><input type="text" id="in-pc-thamnien" value="" oninput="formatInput(this); calculate()"></td></tr>
+            <tr style="color: #666;"><td class="label-cell">BHXH (8%)</td><td id="lbl-bhxh" class="auto-calc">0</td></tr>
+            <tr style="color: #666;"><td class="label-cell">BHYT (1.5%)</td><td id="lbl-bhyt" class="auto-calc">0</td></tr>
+            <tr style="color: #666;"><td class="label-cell">BHTN (1%)</td><td id="lbl-bhtn" class="auto-calc">0</td></tr>
+            <tr class="final-row">
+                <td class="label-cell">THỰC NHẬN</td>
+                <td id="lbl-total" class="auto-calc" style="color: #d9534f; font-size: 1.1em;">0</td>
+            </tr>
+        </table>
+    </div>
+
+<!-- Nút mở đồ thị -->
+<div style="text-align:center; margin-top:20px;">
+    <div id="toggle-chart" onclick="toggleChart()" 
+         style="cursor:pointer; font-weight:bold; color:#007bff; font-size:16px;">
+        📊 ĐỒ THỊ THU NHẬP
+    </div>
+</div>
+
+<!-- Khu vực đồ thị -->
+<div id="chart-container" style="display:none; margin-top:15px;">
+    <canvas id="salaryChart" height="200"></canvas>
+</div>
+
+<!-- Thư viện Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    
+</div>
+
+<div class="footer">
+    <p>Developed by Nguyen Thanh Nhan | E/R Outfitting 1 | @ 2026</p>
+</div>
+
+<script>
+
+const APP_VERSION = "v21.6"; // 🔥 đổi mỗi lần update
+console.log("VERSION HVS " + APP_VERSION);
+    
+// --- 1. CẤU HÌNH NGÀY LỄ ---
+const holidaysSolar = {
+    "1-1": "Tết Dương lịch",
+    "4-30": "Giải phóng miền Nam",
+    "5-1": "Quốc tế Lao động",
+    "9-2": "Quốc khánh"
+};
+
+const holidaysLunar = {
+    "1-1": "Tết Nguyên Đán",
+    "1-2": "Tết Nguyên Đán",
+    "1-3": "Tết Nguyên Đán",
+    "3-10": "Giỗ tổ Hùng Vương",
+    "5-5": "Tết Đoan Ngọ",
+    "8-15": "Trung Thu"
+};
+
+const daysOfWeek = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+
+// --- 2. THUẬT TOÁN ÂM LỊCH VIỆT NAM CHUẨN ---
+// (Dựa trên thuật toán của Hồ Ngọc Đức, đã tinh gọn để chạy mượt trên Mobile)
+function getLunarDate(dd, mm, yy) {
+    let k, jdn, nm, a11, off, lunarDay, lunarMonth;
+    const timeZone = 7;
+    
+    // Tính Julian Day Number
+    let a = Math.floor((14 - (mm + 1)) / 12);
+    let y = yy + 4800 - a;
+    let m = (mm + 1) + 12 * a - 3;
+    jdn = dd + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+
+    k = Math.floor((jdn - 2415021.076998695) / 29.530588853);
+    nm = getNewMoonDay(k + 1, timeZone);
+    if (nm > jdn) nm = getNewMoonDay(k, timeZone);
+    
+    lunarDay = jdn - nm + 1;
+    a11 = getLunarMonth11(yy, timeZone);
+    if (a11 > jdn) a11 = getLunarMonth11(yy - 1, timeZone);
+    
+    lunarMonth = Math.floor((nm - a11 + 2) / 29.531) + 11;
+    if (lunarMonth > 12) lunarMonth -= 12;
+
+    return { day: lunarDay, month: lunarMonth };
+}
+
+function getNewMoonDay(k, timeZone) {
+    let T = k / 1236.85;
+    let dr = Math.PI / 180;
+    let Jd1 = 2415020.75933 + 29.53058868 * k + 0.0001178 * T * T;
+    let M = (359.2242 + 29.10535608 * k) * dr;
+    let Mpr = (306.0253 + 385.81691806 * k) * dr;
+    let F = (21.2964 + 390.67050646 * k) * dr;
+    let C1 = (0.1734 - 0.000393 * T) * Math.sin(M) - 0.4068 * Math.sin(Mpr) + 0.0104 * Math.sin(2 * F);
+    return Math.floor(Jd1 + C1 + 0.5 + timeZone / 24);
+}
+
+function getLunarMonth11(yy, timeZone) {
+    let off = jdFromDate(31, 12, yy) - 2415021;
+    let k = Math.floor(off / 29.530588853);
+    let nm = getNewMoonDay(k, timeZone);
+    let sunLong = getSunLongitude(nm, timeZone);
+    if (sunLong >= 9) nm = getNewMoonDay(k - 1, timeZone);
+    return nm;
+}
+
+function jdFromDate(d, m, y) {
+    let a = Math.floor((14 - m) / 12);
+    let y_adj = y + 4800 - a;
+    let m_adj = m + 12 * a - 3;
+    return d + Math.floor((153 * m_adj + 2) / 5) + 365 * y_adj + Math.floor(y_adj / 4) - Math.floor(y_adj / 100) + Math.floor(y_adj / 400) - 32045;
+}
+
+function getSunLongitude(jdn, timeZone) {
+    let T = (jdn - 2451545.5 - timeZone / 24) / 36525;
+    let L0 = 280.46645 + 36000.76983 * T;
+    let DL = (1.9146 - 0.0048 * T) * Math.sin((357.5291 + 35999.0503 * T) * Math.PI / 180);
+    return Math.floor((L0 + DL) / 30) % 12;
+}
+
+// --- 3. LOGIC HIỂN THỊ VÀ TÍNH TOÁN (ĐÃ FIX) ---
+function init() {
+     document.getElementById("app-version").innerText = "HVS " + APP_VERSION;
+    const monthSel = document.getElementById('month-select');
+    for(let i=0; i<12; i++) {
+        let opt = document.createElement('option');
+        opt.value = i; opt.text = "Tháng " + (i+1);
+        monthSel.add(opt);
+    }
+    monthSel.value = new Date().getMonth();
+    const savedName = localStorage.getItem('hvs_user_name');
+    if (savedName) document.getElementById('user-name').value = savedName;
+    renderTodayInfo(); // ✅ THÊM DÒNG NÀY
+    renderCalendar();
+    checkUpcomingHolidays();
+}
+
+    // --- TÍNH NĂNG NHẮC NHỞ THÔNG MINH ---
+function checkUpcomingHolidays() {
+    const today = new Date();
+    let notifications = [];
+
+    // Kiểm tra trong vòng 7 ngày tới
+    for (let i = 0; i <= 7; i++) {
+        let checkDate = new Date();
+        checkDate.setDate(today.getDate() + i);
+        
+        let d = checkDate.getDate();
+        let m = checkDate.getMonth();
+        let y = checkDate.getFullYear();
+
+        // Kiểm tra Dương lịch
+        let sKey = (m + 1) + "-" + d;
+        if (holidaysSolar[sKey]) {
+            notifications.push(`Sắp đến ngày <b>${holidaysSolar[sKey]}</b> (${d}/${m+1})`);
+        }
+
+        // Kiểm tra Âm lịch
+        let lunar = getLunarDate(d, m, y);
+        let lKey = lunar.month + "-" + lunar.day;
+        if (holidaysLunar[lKey]) {
+            notifications.push(`Sắp đến ngày <b>${holidaysLunar[lKey]}</b> (Âm lịch: ${lunar.day}/${lunar.month})`);
+        }
+    }
+
+    // Hiển thị Banner nếu có thông báo
+    if (notifications.length > 0) {
+        const uniqueNoti = [...new Set(notifications)]; // Xóa trùng lặp
+        const banner = document.createElement('div');
+        banner.style = "background: #fff3cd; color: #856404; padding: 10px; text-align: center; border-bottom: 2px solid #ffeeba; font-size: 14px; position: sticky; top: 0; z-index: 1000;";
+        banner.innerHTML = "🔔 " + uniqueNoti.join(" | ");
+        document.body.prepend(banner);
+    }
+}
+
+// Gọi hàm này trong window.onload hoặc init()
+// checkUpcomingHolidays();
+
+function renderCalendar() {
+    const month = parseInt(document.getElementById('month-select').value);
+    const year = parseInt(document.getElementById('year-select').value);
+    const today = new Date();
+    const container = document.getElementById('calendar-content');
+    container.innerHTML = '';
+    
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    let startPos = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+    let dayCounter = 1;
+
+    while (dayCounter <= lastDay) {
+        let wrap = document.createElement('div');
+        wrap.className = 'table-responsive';
+        let table = document.createElement('table');
+        let hRow = `<tr class="header-green"><td class="label-cell">Thứ</td>`, 
+            dRow = `<tr class="header-green"><td class="label-cell">Ngày</td>`, 
+            tRow = `<tr><td class="label-cell">Thường</td>`, 
+            oRow = `<tr><td class="label-cell">OVT</td>`,
+            nRow = `<tr class="note-row"><td class="label-cell" style="font-weight:normal;color:#888">Ghi chú</td>`;
+
+        for (let i = 0; i < 7; i++) {
+            let isSun = (i === 6);
+            hRow += `<td class="${isSun ? 'sun-column' : ''}">${daysOfWeek[i]}</td>`;
+            if ((dayCounter === 1 && i < startPos) || dayCounter > lastDay) {
+                dRow += '<td></td>'; tRow += '<td></td>'; oRow += '<td></td>'; nRow += '<td></td>';
+            } else {
+                let solarKey = (month + 1) + "-" + dayCounter;
+                let lunar = getLunarDate(dayCounter, month, year);
+                let lunarKey = lunar.month + "-" + lunar.day;
+                let holidayText = holidaysSolar[solarKey] || holidaysLunar[lunarKey] || "";
+                let isToday = (dayCounter === today.getDate() && month === today.getMonth() && year === today.getFullYear());
+
+                dRow += `<td class="${isSun ? 'sun-column' : ''} ${isToday ? 'today-cell' : ''}">
+                            <div style="${isSun ? 'color:red' : ''}">${dayCounter}</div>
+                            <div style="font-size:9px;color:#666">${lunar.day}/${lunar.month}</div>
+                         </td>`;
+                tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
+                oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
+                nRow += `<td class="${isSun ? 'sun-column' : ''}">
+                            <div class="in-n-wrapper">
+                                <textarea class="in-n ${holidayText ? 'holiday-note' : ''}" data-day="${dayCounter}" data-holiday="${holidayText}" oninput="handleNoteInput(this)">${holidayText}</textarea>
+                            </div>
+                         </td>`;
+                dayCounter++;
+            }
+        }
+        hRow += '<td class="total-cell">TỔNG</td></tr>'; dRow += '<td></td></tr>';
+        tRow += '<td class="total-cell w-t">0</td></tr>'; oRow += '<td class="total-cell w-o">0</td></tr>';
+        nRow += '<td></td></tr>';
+        if (container.children.length === 0) {
+    const monthRow = `
+        <tr>
+            <td colspan="9" style="
+                text-align:center;
+                font-weight:bold;
+                font-size:17px;
+                background:#f0f8ff;
+                color:#007bff;
+                padding:6px;
+                border-bottom:2px solid #007bff;
+            ">
+                Tháng ${month + 1} / ${year}
+            </td>
+        </tr>
+    `;
+
+    table.innerHTML = monthRow + hRow + dRow + tRow + oRow + nRow;
+} else {
+    table.innerHTML = hRow + dRow + tRow + oRow + nRow;
+}
+        wrap.appendChild(table);
+        container.appendChild(wrap);
+        startPos = 0;
+    }
+    loadSavedData();
+    calculate();
+    setupNoteExpand();
+}
+
+// --- (Các hàm calculate, saveData, loadSavedData... giữ nguyên như cũ hoặc Boss dán đè bản dưới đây) ---
+function formatNumber(n) { return n.toString().replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+function parseNumber(s) { return parseFloat(s.toString().replace(/,/g, "")) || 0; }
+function formatInput(el) { let val = el.value.replace(/,/g, ""); if (!isNaN(val) && val !== "") { el.value = formatNumber(val); } }
+
+function calculate() {
+    let tNT = 0, oNT = 0, tCN = 0;
+    document.querySelectorAll('.table-responsive').forEach(wrap => {
+        let wT = 0, wO = 0;
+        wrap.querySelectorAll('.in-t').forEach(input => {
+            let val = Number(input.value) || 0; wT += val;
+            if (input.classList.contains('is-sun')) tCN += val; else tNT += val;
         });
-      })
-      .catch(() => caches.match(event.request))
-  );
-});
+        wrap.querySelectorAll('.in-o').forEach(input => {
+            let val = Number(input.value) || 0; wO += val;
+            if (input.classList.contains('is-sun')) tCN += val; else oNT += val;
+        });
+        wrap.querySelector('.w-t').innerText = wT;
+        wrap.querySelector('.w-o').innerText = wO;
+    });
+    document.getElementById('res-thuong').innerText = tNT;
+    document.getElementById('res-ovt').innerText = oNT;
+    document.getElementById('res-cn').innerText = tCN;
 
-self.addEventListener("message", event => {
-  if (event.data && event.data.action === "skipWaiting") {
-    self.skipWaiting();
-  }
+    const lcb = parseNumber(document.getElementById('in-lcb').value);
+    const pccv = parseNumber(document.getElementById('in-pc-chucvu').value);
+    const pccv_viec = parseNumber(document.getElementById('in-pc-congviec').value);
+    const pctn = parseNumber(document.getElementById('in-pc-thamnien').value);
+    const luongCanCuBH = lcb + pccv + pccv_viec + pctn;
+    const luongGioThucTe = Math.round((lcb / 192) * tNT);
+    document.getElementById('lbl-luong-gio').innerText = luongGioThucTe.toLocaleString();
+    const donGiaGio = luongCanCuBH / 192;
+    const tienThemGio = Math.round((donGiaGio * oNT * 1.5) + (donGiaGio * tCN * 2));
+    document.getElementById('lbl-ovt-money').innerText = tienThemGio.toLocaleString();
+    const bhxh = Math.round(luongCanCuBH * 0.08), bhyt = Math.round(luongCanCuBH * 0.015), bhtn = Math.round(luongCanCuBH * 0.01);
+    document.getElementById('lbl-bhxh').innerText = bhxh.toLocaleString();
+    document.getElementById('lbl-bhyt').innerText = bhyt.toLocaleString();
+    document.getElementById('lbl-bhtn').innerText = bhtn.toLocaleString();
+    const thucNhan = (luongGioThucTe + tienThemGio + pccv + pctn + pccv_viec) - (bhxh + bhyt + bhtn);
+    document.getElementById('lbl-total').innerText = thucNhan.toLocaleString() + " ₫";
+}
+
+function saveData() {
+    const m = document.getElementById('month-select').value, y = document.getElementById('year-select').value, name = document.getElementById('user-name').value;
+    if (!name) { alert("Vui lòng nhập tên!"); return; }
+    const data = { thuong: {}, ovt: {}, note: {}, salary: {} };
+    document.querySelectorAll('.in-t').forEach(i => { if(i.dataset.day) data.thuong[i.dataset.day] = i.value });
+    document.querySelectorAll('.in-o').forEach(i => { if(i.dataset.day) data.ovt[i.dataset.day] = i.value });
+    document.querySelectorAll('.in-n').forEach(i => {
+        if(i.dataset.day) {
+            let val = i.value;
+            const holiday = i.dataset.holiday || "";
+            if (holiday && val.startsWith(holiday)) val = val.replace(holiday, "").trim();
+            data.note[i.dataset.day] = val;
+        }
+    });
+    data.salary = { lcb: document.getElementById('in-lcb').value, pccv: document.getElementById('in-pc-chucvu').value, pccviec: document.getElementById('in-pc-congviec').value, pctn: document.getElementById('in-pc-thamnien').value };
+    localStorage.setItem(`hvs_data_${y}_${m}`, JSON.stringify(data));
+    localStorage.setItem('hvs_user_name', name);
+    alert("Đã lưu dữ liệu Boss!");
+}
+
+function loadSavedData() {
+    const m = document.getElementById('month-select').value, y = document.getElementById('year-select').value;
+    const saved = localStorage.getItem(`hvs_data_${y}_${m}`);
+    if (saved) {
+        const d = JSON.parse(saved);
+        document.querySelectorAll('.in-t').forEach(i => { if(d.thuong && d.thuong[i.dataset.day]) i.value = d.thuong[i.dataset.day] });
+        document.querySelectorAll('.in-o').forEach(i => { if(d.ovt && d.ovt[i.dataset.day]) i.value = d.ovt[i.dataset.day] });
+        document.querySelectorAll('.in-n').forEach(i => {
+            if (d.note && d.note[i.dataset.day] !== undefined) {
+                const holiday = i.dataset.holiday || "";
+                i.value = holiday ? (holiday + "\n" + d.note[i.dataset.day]).trim() : d.note[i.dataset.day];
+                checkLines(i);
+            }
+        });
+        if(d.salary) {
+            document.getElementById('in-lcb').value = d.salary.lcb || "";
+            document.getElementById('in-pc-chucvu').value = d.salary.pccv || "";
+            document.getElementById('in-pc-congviec').value = d.salary.pccviec || "";
+            document.getElementById('in-pc-thamnien').value = d.salary.pctn || "";
+        }
+    }
+}
+
+
+
+function checkLines(el) {
+    const hasNewLine = el.value.includes('\n');
+    const parent = el.parentElement;
+    if (hasNewLine && el.value.trim() !== "") parent.classList.add('has-multi-line');
+    else parent.classList.remove('has-multi-line');
+}
+
+
+
+function resetData() {
+    if (confirm("Bạn có chắc muốn xóa sạch công tháng này?")) {
+        const m = document.getElementById('month-select').value, y = document.getElementById('year-select').value;
+        localStorage.removeItem(`hvs_data_${y}_${m}`);
+        renderCalendar();
+    }
+}
+
+function exportImage() {
+    const btn = document.querySelector('.btn-export'); btn.innerText = "ĐANG TẠO..."; btn.disabled = true;
+    html2canvas(document.querySelector('.container'), { scale: 2, useCORS: true }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `Cong_HVS_${document.getElementById('user-name').value}_T${Number(document.getElementById('month-select').value)+1}.png`;
+        link.href = canvas.toDataURL(); link.click();
+        btn.innerText = "XUẤT ẢNH"; btn.disabled = false;
+    });
+}
+
+async function shareWeb() {
+    try { await navigator.share({ title: 'QUẢN LÝ CÔNG HVS', url: window.location.href }); } catch (e) { alert("Đã sao chép link!"); }
+}
+
+window.onload = init;
+
+function checkLines(el) {
+    // Nếu nội dung có dấu xuống dòng (\n) thì hiện đốm xanh
+    const hasNewLine = el.value.includes('\n');
+    const parent = el.parentElement;
+    
+    if (hasNewLine && el.value.trim() !== "") {
+        parent.classList.add('has-multi-line');
+    } else {
+        parent.classList.remove('has-multi-line');
+    }
+}
+
+// Cập nhật lại hàm load để quét dữ liệu cũ khi vừa mở trang
+const oldLoadSavedData = loadSavedData;
+loadSavedData = function() {
+    oldLoadSavedData();
+    // Đợi 1 chút để dữ liệu điền vào các ô rồi mới kiểm tra dòng
+    setTimeout(() => {
+        document.querySelectorAll('.in-n').forEach(el => checkLines(el));
+    }, 100);
+}
+
+
+
+function setupNoteExpand() {
+    document.querySelectorAll('.in-n').forEach(el => {
+
+        if (el.dataset.bound) return;
+        el.dataset.bound = "1";
+
+        el.addEventListener('focus', function () {
+            const rect = el.getBoundingClientRect();
+
+            // Lưu style cũ
+            el.dataset.oldStyle = el.getAttribute('style') || "";
+
+            const newWidth = rect.width * 3;
+            const newHeight = rect.height * 3;
+
+            // Giữ vị trí gần ô cũ (không nhảy giữa màn hình)
+            el.style.setProperty('position', 'fixed', 'important');
+            el.style.setProperty('top', rect.top + 'px', 'important');
+            el.style.setProperty('left', rect.left + 'px', 'important');
+
+            el.style.setProperty('width', newWidth + 'px', 'important');
+            el.style.setProperty('height', newHeight + 'px', 'important');
+
+            el.style.setProperty('z-index', '9999', 'important');
+            el.style.setProperty('background', '#fff', 'important');
+            el.style.setProperty('border', '2px solid #007bff', 'important');
+            el.style.setProperty('box-shadow', '0 8px 20px rgba(0,0,0,0.25)', 'important');
+        });
+
+        el.addEventListener('blur', function () {
+            el.setAttribute('style', el.dataset.oldStyle || "");
+        });
+
+    });
+}
+
+
+let chartInstance = null;
+
+function toggleChart() {
+    const container = document.getElementById('chart-container');
+
+    if (container.style.display === "none") {
+        container.style.display = "block";
+        renderChart();
+    } else {
+        container.style.display = "none";
+    }
+}
+
+function renderChart() {
+    const ctx = document.getElementById('salaryChart').getContext('2d');
+    const year = document.getElementById('year-select').value;
+    let labels = [];
+    let data = [];
+
+    for (let m = 0; m < 12; m++) {
+        labels.push("T" + (m + 1));
+        const saved = localStorage.getItem(`hvs_data_${year}_${m}`);
+        
+        if (saved) {
+            const d = JSON.parse(saved);
+            
+            // --- Bắt đầu logic tính lương chuẩn ---
+            const lcb = parseNumber(d.salary?.lcb || 0);
+            const pccv = parseNumber(d.salary?.pccv || 0);
+            const pccv_viec = parseNumber(d.salary?.pccviec || 0);
+            const pctn = parseNumber(d.salary?.pctn || 0);
+
+            // Cần tạo một DOM tạm để biết ngày nào là Chủ Nhật
+            const firstDayOfMonth = new Date(year, m, 1);
+            const daysInMonth = new Date(year, m + 1, 0).getDate();
+            let startDayOfWeek = firstDayOfMonth.getDay(); // 0=CN, 1=T2,...
+            if (startDayOfWeek === 0) startDayOfWeek = 7; // Chuyển CN về cuối tuần (7)
+
+            let tNT = 0, oNT = 0, tCN = 0;
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayOfWeek = (startDayOfWeek + day - 2) % 7 + 1; // 1=T2, ..., 7=CN
+                const isSun = (dayOfWeek === 7);
+
+                const thuongVal = Number(d.thuong?.[day] || 0);
+                const ovtVal = Number(d.ovt?.[day] || 0);
+
+                if (isSun) {
+                    tCN += thuongVal + ovtVal;
+                } else {
+                    tNT += thuongVal;
+                    oNT += ovtVal;
+                }
+            }
+            
+            const luongCanCuBH = lcb + pccv + pccv_viec + pctn;
+            const luongGioThucTe = Math.round((lcb / 192) * tNT);
+            const donGiaGio = luongCanCuBH > 0 ? luongCanCuBH / 192 : 0;
+            const tienThemGio = Math.round((donGiaGio * oNT * 1.5) + (donGiaGio * tCN * 2));
+
+            const bhxh = Math.round(luongCanCuBH * 0.08);
+            const bhyt = Math.round(luongCanCuBH * 0.015);
+            const bhtn = Math.round(luongCanCuBH * 0.01);
+            
+            const thucNhan = (luongGioThucTe + tienThemGio + pccv + pctn + pccv_viec) - (bhxh + bhyt + bhtn);
+            
+            data.push(thucNhan > 0 ? Math.round(thucNhan) : 0);
+            // --- Kết thúc logic tính lương chuẩn ---
+
+        } else {
+            data.push(0);
+        }
+    }
+
+    if (chartInstance) {
+        chartInstance.destroy();
+    }
+
+    chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Thu nhập (₫)',
+                data: data,
+                tension: 0.3,
+                fill: true,
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                borderColor: 'rgba(0, 123, 255, 1)',
+                pointBackgroundColor: 'rgba(0, 123, 255, 1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y.toLocaleString() + ' ₫';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    ticks: {
+                        callback: function(value) {
+                             if (value >= 1000000) return (value / 1000000).toLocaleString() + ' Tr';
+                             if (value >= 1000) return (value / 1000).toLocaleString() + ' K';
+                             return value;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function handleNoteInput(el) {
+    const holiday = el.dataset.holiday || "";
+
+    if (holiday) {
+        // Luôn giữ dòng lễ ở đầu
+        let userText = el.value.replace(holiday, "").trimStart();
+
+        el.value = holiday + (userText ? "\n" + userText : "\n");
+    }
+
+    checkLines(el);
+}
+
+function renderTodayInfo() {
+    const el = document.getElementById("today-info");
+    const now = new Date();
+
+    const days = ["Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy"];
+
+    const dayName = days[now.getDay()];
+    const d = now.getDate();
+    const m = now.getMonth() + 1;
+    const y = now.getFullYear();
+
+    el.innerText = `${dayName}, ngày ${d} tháng ${m} năm ${y}`;
+}
+
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js").then(reg => {
+
+        console.log("SW registered");
+
+        // 🔥 check update liên tục
+        setInterval(() => {
+            reg.update();
+        }, 5000);
+
+        // 🔥 phát hiện có bản mới
+      reg.onupdatefound = () => {
+    const newWorker = reg.installing;
+
+    newWorker.onstatechange = () => {
+        if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+
+            console.log("🔥 Có version mới → auto update");
+
+            // ⛔ bỏ banner
+            // showUpdateBanner();
+
+            // ✅ Tự update sau 2 giây
+            setTimeout(() => {
+                updateApp();
+            }, 2000);
+        }
+    };
+};
+
+    }).catch(err => console.log("SW error", err));
+
+    // 🔥 reload khi SW mới active
+   
+
+
+}
+
+ let refreshing = false;
+navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (refreshing) return;
+    refreshing = true;
+
+    // 🔥 Auto reload sau 5 giây khi có version mới
+    setTimeout(() => {
+        location.reload();
+    }, 5000);
 });
+/*navigator.serviceWorker.addEventListener('controllerchange', function () {
+    location.reload();
+}); */
+
+function showUpdateBanner() {
+    if (document.getElementById("update-banner")) return;
+
+    const banner = document.createElement("div");
+    banner.id = "update-banner";
+
+    banner.innerHTML = `
+        🚀 Có phiên bản mới!
+        <button onclick="updateApp()" 
+            style="margin-left:10px;padding:5px 10px;border:none;border-radius:4px;background:#fff;color:#007bff;font-weight:bold;">
+            Cập nhật
+        </button>
+    `;
+
+    banner.style = `
+        position:fixed;
+        top:0;
+        left:0;
+        right:0;
+        background:#007bff;
+        color:white;
+        text-align:center;
+        padding:10px;
+        z-index:9999;
+        font-size:14px;
+    `;
+
+    document.body.appendChild(banner);
+
+  
+}
+
+function updateApp() {
+    navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg && reg.waiting) {
+            reg.waiting.postMessage({ action: "skipWaiting" });
+        }
+    });
+}
+
+    
+</script>
+   </div>
+
+<div class="footer">
+
+    <div id="app-version" 
+     style="position:fixed; bottom:5px; right:30px; font-size:11px; color:#666; z-index:9999;">
+</div>
+    
+</body>
+</html>

@@ -879,18 +879,22 @@ function exportExcel() {
     let data = [];
 
     // Header
-    data.push(["Ngày", "Thường", "OVT", "Ghi chú"]);
+    data.push(["Thứ", "Ngày", "Thường", "OVT", "Ghi chú"]);
 
-    document.querySelectorAll('.in-t').forEach(input => {
-        const day = input.dataset.day;
-        if (!day) return;
+   document.querySelectorAll('.in-t').forEach(input => {
+    const day = input.dataset.day;
+    if (!day) return;
 
-        const thuong = input.value || 0;
-        const ovt = document.querySelector(`.in-o[data-day="${day}"]`)?.value || 0;
-        const note = document.querySelector(`.in-n[data-day="${day}"]`)?.value || "";
+    const date = new Date(y, m, day);
+    const days = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+    const thu = days[date.getDay()];
 
-        data.push([day, thuong, ovt, note]);
-    });
+    const thuong = input.value || 0;
+    const ovt = document.querySelector(`.in-o[data-day="${day}"]`)?.value || 0;
+    const note = document.querySelector(`.in-n[data-day="${day}"]`)?.value || "";
+
+    data.push([thu, day, thuong, ovt, note]);
+});
 
     // Thêm salary
     data.push([]);
@@ -924,26 +928,34 @@ function importExcel(event) {
         // Reset trước khi nhập
         resetData();
 
+      
+        
         json.forEach(row => {
-            const day = row[0];
+    const day = row[1]; // ⚠️ đổi từ row[0] → row[1]
 
-            // dữ liệu ngày
-            if (typeof day === "number") {
-                const thuong = row[1] || "";
-                const ovt = row[2] || "";
-                const note = row[3] || "";
+    if (typeof day === "number") {
+        const thuong = row[2] || "";
+        const ovt = row[3] || "";
+        const note = row[4] || "";
 
-                const tInput = document.querySelector(`.in-t[data-day="${day}"]`);
-                const oInput = document.querySelector(`.in-o[data-day="${day}"]`);
-                const nInput = document.querySelector(`.in-n[data-day="${day}"]`);
+        const tInput = document.querySelector(`.in-t[data-day="${day}"]`);
+        const oInput = document.querySelector(`.in-o[data-day="${day}"]`);
+        const nInput = document.querySelector(`.in-n[data-day="${day}"]`);
 
-                if (tInput) tInput.value = thuong;
-                if (oInput) oInput.value = ovt;
-                if (nInput) {
-                    nInput.value = note;
-                    checkLines(nInput);
-                }
-            }
+        if (tInput) tInput.value = thuong;
+        if (oInput) oInput.value = ovt;
+        if (nInput) {
+            nInput.value = note;
+            checkLines(nInput);
+        }
+    }
+
+    // salary giữ nguyên
+    if (row[0] === "LCB") document.getElementById('in-lcb').value = row[1];
+    if (row[0] === "PC Chức vụ") document.getElementById('in-pc-chucvu').value = row[1];
+    if (row[0] === "PC Công việc") document.getElementById('in-pc-congviec').value = row[1];
+    if (row[0] === "PC Thâm niên") document.getElementById('in-pc-thamnien').value = row[1];
+});
 
             // salary
             if (row[0] === "LCB") document.getElementById('in-lcb').value = row[1];

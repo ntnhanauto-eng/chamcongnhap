@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#007bff">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -164,11 +165,16 @@
     <div id="calendar-content"></div>
 
     <div class="summary-wrapper">
-        <div class="button-group">
-            <button class="btn-save" onclick="saveData()">LƯU DỮ LIỆU</button>
-            <button class="btn-export" onclick="exportImage()">XUẤT ẢNH</button>
-            <button class="btn-reset" onclick="resetData()">RESET</button>
-        </div>
+       <div class="button-group">
+    <button class="btn-save" onclick="saveData()">LƯU DỮ LIỆU</button>
+    <button class="btn-export" onclick="exportImage()">XUẤT ẢNH</button>
+    <button class="btn-export" onclick="exportExcel()">XUẤT EXCEL</button>
+    <button class="btn-export" onclick="document.getElementById('import-file').click()">NHẬP EXCEL</button>
+    <button class="btn-reset" onclick="resetData()">RESET</button>
+
+    <!-- input ẩn -->
+    <input type="file" id="import-file" accept=".xlsx" style="display:none" onchange="importExcel(event)">
+</div>
         
         <table style="width: 100%; margin-bottom: 5px; border: 1px solid #444;">
             <tr><td class="label-cell" style="background:var(--green-bg)">Tổng Thường</td><td id="res-thuong" style="font-weight:bold; text-align:right; padding-right:10px">0</td></tr>
@@ -865,6 +871,98 @@ function updateApp() {
     });
 }
 
+function exportExcel() {
+    const m = Number(document.getElementById('month-select').value);
+    const y = document.getElementById('year-select').value;
+    const name = document.getElementById('user-name').value || "User";
+
+    let data = [];
+
+    // Header
+    data.push(["Ngày", "Thường", "OVT", "Ghi chú"]);
+
+    document.querySelectorAll('.in-t').forEach(input => {
+        const day = input.dataset.day;
+        if (!day) return;
+
+        const thuong = input.value || 0;
+        const ovt = document.querySelector(`.in-o[data-day="${day}"]`)?.value || 0;
+        const note = document.querySelector(`.in-n[data-day="${day}"]`)?.value || "";
+
+        data.push([day, thuong, ovt, note]);
+    });
+
+    // Thêm salary
+    data.push([]);
+    data.push(["LCB", document.getElementById('in-lcb').value]);
+    data.push(["PC Chức vụ", document.getElementById('in-pc-chucvu').value]);
+    data.push(["PC Công việc", document.getElementById('in-pc-congviec').value]);
+    data.push(["PC Thâm niên", document.getElementById('in-pc-thamnien').value]);
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Data");
+
+    XLSX.writeFile(wb, `Cong_${name}_T${m+1}_${y}.xlsx`);
+}
+
+
+ //code nhập excel   
+function importExcel(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        const sheet = workbook.Sheets["Data"];
+        const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+        // Reset trước khi nhập
+        resetData();
+
+        json.forEach(row => {
+            const day = row[0];
+
+            // dữ liệu ngày
+            if (typeof day === "number") {
+                const thuong = row[1] || "";
+                const ovt = row[2] || "";
+                const note = row[3] || "";
+
+                const tInput = document.querySelector(`.in-t[data-day="${day}"]`);
+                const oInput = document.querySelector(`.in-o[data-day="${day}"]`);
+                const nInput = document.querySelector(`.in-n[data-day="${day}"]`);
+
+                if (tInput) tInput.value = thuong;
+                if (oInput) oInput.value = ovt;
+                if (nInput) {
+                    nInput.value = note;
+                    checkLines(nInput);
+                }
+            }
+
+            // salary
+            if (row[0] === "LCB") document.getElementById('in-lcb').value = row[1];
+            if (row[0] === "PC Chức vụ") document.getElementById('in-pc-chucvu').value = row[1];
+            if (row[0] === "PC Công việc") document.getElementById('in-pc-congviec').value = row[1];
+            if (row[0] === "PC Thâm niên") document.getElementById('in-pc-thamnien').value = row[1];
+        });
+
+        calculate();
+        alert("Đã nhập Excel thành công!");
+    };
+
+    reader.readAsArrayBuffer(file);
+}
+    
+
+
+
+    
     
 </script>
    </div>

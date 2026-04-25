@@ -369,77 +369,114 @@ function renderCalendar() {
     const year = parseInt(document.getElementById('year-select').value);
     const today = new Date();
     const container = document.getElementById('calendar-content');
+
     container.innerHTML = '';
-    
+
+    // ===== TITLE NGOÀI TABLE (FIX LỆCH CỘT) =====
+    const title = document.createElement('div');
+    title.style = `
+        text-align:center;
+        font-weight:bold;
+        font-size:17px;
+        background:#f0f8ff;
+        color:#007bff;
+        padding:6px;
+        border-bottom:2px solid #007bff;
+        margin-bottom:5px;
+    `;
+    title.innerText = `Tháng ${month + 1} / ${year}`;
+    container.appendChild(title);
+
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0).getDate();
-    let startPos = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+
+    let startPos = firstDay.getDay();
+    startPos = startPos === 0 ? 6 : startPos - 1;
+
     let dayCounter = 1;
 
     while (dayCounter <= lastDay) {
+
         let wrap = document.createElement('div');
         wrap.className = 'table-responsive';
+
         let table = document.createElement('table');
-        let hRow = `<tr class="header-green"><td class="label-cell">Thứ</td>`, 
-            dRow = `<tr class="header-green"><td class="label-cell">Ngày</td>`, 
-            tRow = `<tr><td class="label-cell">Thường</td>`, 
-            oRow = `<tr><td class="label-cell">OVT</td>`,
-            nRow = `<tr class="note-row"><td class="label-cell" style="font-weight:normal;color:#888">Ghi chú</td>`;
+
+        let hRow = `<tr class="header-green"><td class="label-cell">Thứ</td>`;
+        let dRow = `<tr class="header-green"><td class="label-cell">Ngày</td>`;
+        let tRow = `<tr><td class="label-cell">Thường</td>`;
+        let oRow = `<tr><td class="label-cell">OVT</td>`;
+        let nRow = `<tr class="note-row"><td class="label-cell">Ghi chú</td>`;
 
         for (let i = 0; i < 7; i++) {
+
             let isSun = (i === 6);
+
             hRow += `<td class="${isSun ? 'sun-column' : ''}">${daysOfWeek[i]}</td>`;
+
             if ((dayCounter === 1 && i < startPos) || dayCounter > lastDay) {
-                dRow += '<td></td>'; tRow += '<td></td>'; oRow += '<td></td>'; nRow += '<td></td>';
+
+                dRow += '<td></td>';
+                tRow += '<td></td>';
+                oRow += '<td></td>';
+                nRow += '<td></td>';
+
             } else {
+
                 let solarKey = (month + 1) + "-" + dayCounter;
                 let lunar = getLunarDate(dayCounter, month, year);
                 let lunarKey = lunar.month + "-" + lunar.day;
-                let holidayText = holidaysSolar[solarKey] || holidaysLunar[lunarKey] || "";
-                let isToday = (dayCounter === today.getDate() && month === today.getMonth() && year === today.getFullYear());
 
-                dRow += `<td class="${isSun ? 'sun-column' : ''} ${isToday ? 'today-cell' : ''}">
-                            <div style="${isSun ? 'color:red' : ''}">${dayCounter}</div>
-                            <div style="font-size:9px;color:#666">${lunar.day}/${lunar.month}</div>
+                let holidayText = holidaysSolar[solarKey] || holidaysLunar[lunarKey] || "";
+
+                let isToday =
+                    (dayCounter === today.getDate() &&
+                     month === today.getMonth() &&
+                     year === today.getFullYear());
+
+                dRow += `
+                    <td class="${isSun ? 'sun-column' : ''} ${isToday ? 'today-cell' : ''}">
+                        <div>${dayCounter}</div>
+                        <div style="font-size:9px;color:#666">${lunar.day}/${lunar.month}</div>
+                    </td>`;
+
+                tRow += `<td class="${isSun ? 'sun-column' : ''}">
+                            <input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()">
                          </td>`;
-                tRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-t ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
-                oRow += `<td class="${isSun ? 'sun-column' : ''}"><input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()"></td>`;
+
+                oRow += `<td class="${isSun ? 'sun-column' : ''}">
+                            <input type="number" class="cell-input in-o ${isSun ? 'is-sun' : ''}" data-day="${dayCounter}" oninput="calculate()">
+                         </td>`;
+
                 nRow += `<td class="${isSun ? 'sun-column' : ''}">
                             <div class="in-n-wrapper">
-                                <textarea class="in-n ${holidayText ? 'holiday-note' : ''}" data-day="${dayCounter}" data-holiday="${holidayText}" oninput="handleNoteInput(this)">${holidayText}</textarea>
+                                <textarea class="in-n ${holidayText ? 'holiday-note' : ''}"
+                                    data-day="${dayCounter}"
+                                    data-holiday="${holidayText}"
+                                    oninput="handleNoteInput(this)">
+                                    ${holidayText}
+                                </textarea>
                             </div>
                          </td>`;
+
                 dayCounter++;
             }
         }
-        hRow += '<td class="total-cell">TỔNG</td></tr>'; dRow += '<td></td></tr>';
-        tRow += '<td class="total-cell w-t">0</td></tr>'; oRow += '<td class="total-cell w-o">0</td></tr>';
-        nRow += '<td></td></tr>';
-        if (container.children.length === 0) {
-    const monthRow = `
-        <tr>
-            <td colspan="9" style="
-                text-align:center;
-                font-weight:bold;
-                font-size:17px;
-                background:#f0f8ff;
-                color:#007bff;
-                padding:6px;
-                border-bottom:2px solid #007bff;
-            ">
-                Tháng ${month + 1} / ${year}
-            </td>
-        </tr>
-    `;
 
-    table.innerHTML = monthRow + hRow + dRow + tRow + oRow + nRow;
-} else {
-    table.innerHTML = hRow + dRow + tRow + oRow + nRow;
-}
+        hRow += '<td class="total-cell">TỔNG</td></tr>';
+        dRow += '<td></td></tr>';
+        tRow += '<td class="total-cell w-t">0</td></tr>';
+        oRow += '<td class="total-cell w-o">0</td></tr>';
+        nRow += '<td></td></tr>';
+
+        table.innerHTML = hRow + dRow + tRow + oRow + nRow;
+
         wrap.appendChild(table);
         container.appendChild(wrap);
+
         startPos = 0;
     }
+
     loadSavedData();
     calculate();
     setupNoteExpand();
